@@ -1,0 +1,72 @@
+35.202.224.183
+
+Putty/WinSCP
+------------
+colocar nombre en minuscula: liberdinat
+colocar clave en minuscula: newdestino2018
+la privada se guarda para el winscp
+la publica se coloca en la VM instaces
+
+
+
+Networks:   liberdina-network
+
+User      liberdinaT
+Password  newdestino2018
+
+NGINX
+-----
+en /etc/nginx   se encuentra nginx.conf
+dentro de el esta la configuracion global
+  worker_processes  1;   cambiarlo a    worker_processes  auto;
+y tmb dice
+  access_log  /var/log/nginx/access.log  main;
+  include /etc/nginx/conf.d/*.conf;
+este ultimo dice que todos los files .conf se incluyen
+en /etc/nginx/conf.d/  solo esta el default.conf
+
+
+
+cd /usr/share/nginx/html
+sudo chmod -R 777 html
+
+// Logs
+cd /var/log/nginx
+
+// Config
+cd /etc/nginx/
+
+//Reload
+sudo nginx -s reload
+
+
+
+GOLANG SERVER
+-------------
+cd /home/liberdina  se encuentra ServerServina
+chmod 777 ServerServina
+
+./ServerServina
+
+Version de SO
+-------------
+cat /etc/*-release
+
+Install Go en Centos
+--------------------
+sudo yum install golang
+sudo yum update
+
+sudo chmod -R 775 LiberdinaT
+
+crontab 
+
+MYSQL
+-----
+mysql-liberdinat
+user: liberdinaroot
+Newdestino2018
+
+
+
+

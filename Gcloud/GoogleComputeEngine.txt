@@ -1,0 +1,86 @@
+GCE (Google Compute Engine) is the perfect place to run Go applications that require such control.
+
+
+. dato estructurado puede guardarse en SQL o NoSQL.
+. la appWeb puede .ingresar un titulo, autor, descripcion, fecha publicacion   . editar   . ver  almacenando esta info en CloudSQL, CloudDataStore or MongoDB
+. la cover image de cada libro se almacena en CloudStorage
+. Autorizacion
+. Logging
+
+
+
+
+2. Habilitar la API para el projecto
+   . GC Datastore api
+   . GC Pub/Sub api
+   . GC Storage Json api
+   . GC Logging api
+   . Google+ api
+
+ https://console.cloud.google.com/flows/enableapi?apiid=datastore.googleapis.com,datastore,pubsub,storage_api,logging,plus&redirect=https:%2F%2Fcloud.google.com%2Fgo%2Fgetting-started%2Frun-on-compute-engine&showconfirmation=true&_ga=1.106012995.1323731321.1473161471&pli=1
+
+ (entonces habilito la API para liberdina)
+
+3. AppEngine
+			helloWorld                     cloudSql
+			   . app.yaml                     . app.yaml
+			   . helloworld.go                . cloudsql.go
+			dentro de helloWorld
+			 gcloud init
+			 aedeploy gcloud app deploy
+
+
+
+Compute engine
+--------------
+instance			MARTE  104.196.146.187
+sudo su 				pasa a root
+cd /					pasa a la raiz de directorio
+apt-get update			actualiza los paquetes del ubuntu
+apt-get install golang
+
+1. ver instalar golang  ver video
+2. subir la carpeta de ServerCentral
+3. ver como persistir en la MYSQL de ComputeEngine,  quizas hay que cambiar las instrucciones/driver
+4. luego ver como se puede cronear para que siempre este corriendo
+
+MYSQL
+idInstancia  acuicola
+IP           104.154.114.200
+Nombre de conexión de instancia			liberdina-148122:us-central1:libreria
+contrasena   mdbroot
+miIP         181.44.116.204
+
+mysql -h 104.154.114.200 -u root -p
+
+
+GOPATH
+. go env                       me lista todas las variables de entorno de GO
+. export GOPATH=$HOME/GoWork
+. go get github.com/go-sql-driver/mysql    bajo el driver de SQL
+
+
+GoWork/src/github.com/marcelo/Pruebas
+
+
+use acuicola;
+drop table establecimiento;
+drop database acuicola;
+drop table lectura;
+
+create database acuicola;
+use acuicola;
+CREATE TABLE `establecimiento` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(45) NOT NULL,
+  `pais` int(11) NOT NULL,
+  `estado` int(11) NOT NULL,
+  `fechaStart` date DEFAULT NULL,
+  `fechaVigencia` date DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+
+CRON
+-----
+sudo apt-get install gnome-schedule

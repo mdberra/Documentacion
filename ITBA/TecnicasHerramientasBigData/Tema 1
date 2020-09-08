@@ -1,0 +1,145 @@
+MAP REDUCE  MR
+----------
+Es un concepto teorico que sirve para procesamiento distribuido SIEMPRE BATCH.  Se puede poner MR en secuencia, en pararelo, un proceso de MR. Cada MR es una transformacion.
+
+Siempre se parte de un FILESYSTEM DISTRIBUIDO con lo cual es solo para procesamiento Batch
+
+MAPS, filtra, transforma, y siempre emite(aunque puede ser nul) 
+
+el shuffle hace de orientador
+
+el Reduce hay uno para cada Clave y siempre hace agregamiento
+
+NO PUEDE ORDENAR LA SALIDA
+
+
+
+Supongamos que se quiere procesar el resultado del Censo Nacional de Población, Hogares y Viviendas 2010: Censo del Bicentenario,​ utilizando Map Reduce.
+
+Suponiendo que como entrada (una por habitante del hogar), se recibe como clave un identificador de entrada y como valor la información del censo que contiene:
+
+   ● edad:​ Cantidad de años cumplidos a la fecha de referencia del Censo
+   ● alfabetismo​ : Sabe leer y escribir
+      ○ 0: Sin datos
+      ○ 1: Si
+      ○ 2: No
+   ● tipoVivienda: ​ Tipo de vivienda particular donde habita
+      ○ 0: Sin datos
+      ○ 1: Casa
+      ○ 2: Rancho
+      ○ 3: Casilla
+      ○ 4: Departamento
+      ○ 5: Pieza en inquilinato
+      ○ 6: Pieza en hotel familiar o pensión
+      ○ 7: Local no construido para habitación
+      ○ 8: Vivienda móvil
+      ○ 9: Persona/s viviendo en la calle
+   ● nombreDepto​ : Nombre del departamento donde habita.
+   ● nombreProv: ​ Nombre de la provincia donde habita.
+   ● hogarId: ​ Identificador del hogar donde habita.
+
+Indicar para cada una de las preguntas:
+   ● La clave y el valor de salida del mapper (indicando si hubo filtrado o transformación).
+   ● La operación a realizar en el proceso de reduce.
+   ● La clave y valor de salida para el proceso de reduce.
+
+Se requiere resolver:
+
+   1. Cantidad de habitantes total del país agrupados de acuerdo a su edad en tres grupos :
+      a. 0 - 14 años    
+      b. 15 - 64 años
+      c. 65 años y más
+
+   2. El promedio de habitantes por vivienda para cada tipo de vivienda.
+
+   3. Los ​ n departamentos con mayor índice de analfabetismo, donde el índice se calcula por el número total de habitantes analfabetos del departamento sobre el total de población del departamento, donde ​ n ​ provee el usuario.
+
+   4. Los departamentos de la provincia ​ prov​ con una cantidad de habitantes menor a tope​, donde ​ prov​ y ​ tope​ lo provee el usuario.
+
+   5. Los pares de departamentos que tienen la misma cantidad de cientos de habitantes.
+
+
+Resolvemos el item 1
+--------------------
+a. primero pensamos la salida
+
+   KF        VF
+   "0-14",   99
+   "15-64",  99
+   "65-mas", 99
+   
+   para cada uno tengo un REDUCE, o sea, hay 3 Reduce
+
+
+b. El MAPPER recibe de a 1 persona (un JSON de entrada con los atributos)
+ existe un mapper por cada operacion, o sea, este mapper proceso la separacion por edad
+ en la implementacion se puede agregar un COMBINER que lo que hace es un reduce en la misma maq antes de enviarla por la red al REDUCE final
+
+entonces categoriza o separa  emitiendo
+   "0-14",   1
+   "15-64",  1
+   "0-14",   1
+   "0-14",   1
+   "0-14",   1
+   "65-mas", 1
+
+
+
+
+
+
+INPUT
+-----
+{"id": 1, "edad": "40", "alfabetismo": "1", "tipoVivienda": "4", "nombreDepto": "aaaa", "nombreProv": "Buenos Aires", "hogarId": "2233"}
+{"id": 2, "edad": "50", "alfabetismo": "1", "tipoVivienda": "1", "nombreDepto": "bbbb", "nombreProv": "Buenos Aires", "hogarId": "3344"}
+{"id": 3, "edad": "20", "alfabetismo": "2", "tipoVivienda": "1", "nombreDepto": "cccc", "nombreProv": "Cordoba",      "hogarId": "4455"}
+{"id": 4, "edad": "30", "alfabetismo": "1", "tipoVivienda": "6", "nombreDepto": "dddd", "nombreProv": "San Luis",     "hogarId": "5566"}
+
+
+
+MAPPING
+-------
+Mapper 1 -> <Exception A, 1>, <Exception B, 1>, <Exception A, 1>, <Exception C, 1>, <Exception A, 1>
+Mapper 2 -> <Exception B, 1>, <Exception B, 1>, <Exception A, 1>, <Exception A, 1>
+Mapper 3 -> <Exception A, 1>, <Exception C, 1>, <Exception A, 1>, <Exception B, 1>, <Exception A, 1>
+Mapper 4 -> <Exception B, 1>, <Exception C, 1>, <Exception C, 1>, <Exception A, 1>
+
+
+
+             SUFFLING          PARTITION     REDUCE
+ListCantHab       ListCantHab
+"0-14",   0       "0-14",   0
+"15-64",  1       "15-64",  4
+"65-mas", 0       "65-mas", 0
+
+ListCantHab
+"0-14",   0
+"15-64",  1
+"65-mas", 0
+
+ListCantHab
+"0-14",   0
+"15-64",  1
+"65-mas", 0
+
+ListCantHab
+"0-14",   0
+"15-64",  1
+"65-mas", 0
+----------------------------------------------------------------------------------------------
+
+
+Luego de Hadoop aparecio YARN como unas cuantas mejoras
+
+YARN es una componente que controla todos los nodos de procemiento distribuido
+Entonces HADOOP puede correr sobre YARN
+
+SE pueden hacer app que corran sobre YARN dado que este ultimo es el que gestiona el procesamiento controlando los nodos
+
+YARN es un controlador de trabajo distribuido generico
+
+
+
+
+
+

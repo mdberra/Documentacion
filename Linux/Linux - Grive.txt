@@ -1,0 +1,9 @@
+sudo apt-add-repository ppa:nilarimogard/webupd8
+sudo apt-get update
+sudo apt-get install grive
+
+grive -a      para loguearse
+
+grive sync    para sincronizar
+
+grive -dry -run   para mostrar que se va a copiar

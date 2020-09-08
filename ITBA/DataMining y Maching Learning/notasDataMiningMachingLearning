@@ -1,0 +1,1710 @@
+R PROJECT   utilizar ETH de Zurich
+hacen carrera de drones con la mente, la conectan con una vinch
+utilizar R STUDIO
+
+mails                                                                                                               USUARIOS EVENTOS   WIFI PASSWORD 87VbffP4
+. mriccillo@itba.edu.ar  y 
+. marcelarobots@gmail.com
+. Parameters   P=0.70  Grupo 3
+
+Inteligencia artificial esta formada por 
+. procesamiento del habla
+. procesamiento de la vision
+. machine learning (aprendizaje automatico) --> redes neuronales
+
+Deteccion y predicciones
+
+AGI  Artificial General Intelligence   No existe y posiblemente no exista,  la maq no tiene sentimiento ni conciencia.  Si existiera tendria ganas y se sentiria viva
+                                       Puede simular sentimientos
+
+
+Instalacion  INSTALAR
+-----------
+sudo apt-get install r-base
+conseguir paquetes que son ejemplos de librerias de libros
+. MASS
+. FARAWAY
+. MLBENCH
+. RGL  //permite graficar en 3 dimensiones
+. CARET
+. RPART
+. RPART.PLOT
+. NeuralNetTools
+. ISLR
+
+R STUDIO
+GGPLOT2
+ver GGPLOT2 from Golang
+
+BUSCAR LIBRO
+. ISLR de HASTIE PDF+   TOMAR LA VERSION CORREGIDA DEL 2017
+. ELEMENT of STATISTICAL LEARNING standfor
+. INTRODUCTION to STATISTICAL LEARNING 
+. INTRODUCTION TO THE THEORY OF NEURAL COMPUTATION   ADISON WESLEY 1991
+. DEEP LEARNING BOOK  MIT  ESTA LIBERADO ES DEL 2016  fue hecho por los padres del DeepLearning
+
+
+
+base de datos IRIS
+
+library(help="datasets")   encontramos airquality
+utils:::menuInstallPkgs()  para instalar los paquetes,  siempre hay que cargar las librerias
+library(faraway)           para cargarlas hacer
+data(worldcup)             para levantar una DB
+library(help="faraway")    dice de que libro, fecha, y todas los datasets que tiene por ej Pero de crianzas de conejos, etc...
+
+para concer nuestra base de datos --> buscar en google R WORLDCUP  R DOCUMENTATION
+
+las variables NUNCA que suponer
+
+fix(worldcup)        para que nos muestre el datasets
+base=worldcup        para renombrar la base hacemos   
+head(base)           trae los primeros 6 elementos
+tail(base)           ultimos elementos
+
+la maq COMPLEMENTA al ser humano, JAMAS lo reemplaza
+
+
+names(base)             nos muestra la metadata
+table(base$Position)    nos muestra la cantidad elementos por Position
+summary(base)           trae las medidas estadisticas basicas
+
+ANALISIS EXPLORATORIO de los Datos
+
+str(base)            Resumen de lo que son las variables
+
+Tipos de Variables
+------------------
+Cuantitativas
+   Numericas
+   Discretas -> numeros enteros
+   Continuas -> numeros reales
+   
+Cualitativas o Categoricas
+   Numericas -> Nominales (sin orden)
+                Ordinales (con orden) Primero/Segundo/etc...
+
+
+base=iris      iris es una base de flores, iris es un lirio. Fisher estudio y encontro metodos para machine learning
+names(base)
+table(base$Species)  cantidad de elementos por posicion
+head(base)
+summary(base)        Mean/Media Promedio        Median Mediana es el elmento del medio. 
+                     La MEDIANA refleja mejor que la Media porque la media no es robusta, Se ve influida por los outlier(elemeneto atipico)
+
+Primer Cuartil       es la mitad de la Mediana
+Tercer QUartil       es la mitad de la segunda parte de la Mediana
+BOXPLOT              buscar,   rango intercuartil, 1 y 3 cuartil, mediana
+                     maximo 3Q + RIQ * 1.5
+                     minimo 1Q - RIQ * 1.5
+   el 1.5 es un valor que sale de un analisis de una distribucion normal,  el rango INTERCUARTIL es el intervalo de valores VALIDOS sin tomar los valores atipicos
+
+   Valores atipicos son todos los que quedan AFUERA del BOXPLOT
+   Valor atipico extremo, son los que queden afuera del intervalo
+                     maximo 3Q + RIQ * 3
+                     minimo 1Q - RIQ * 3
+
+boxplot(base$Petal.Width)      dibuja y detecta valores atipicos
+
+
+Para varianles Cuantitativas  HISTOGRAMA   hist
+Para varianles Cualitativas   BARRAS       barplot
+     dispersion                            plot
+
+str(base)
+   Species: Factor w/3 levels  es cualitativa
+
+table(base$Species)
+barplot(table(base$Species), main="mi primer grafico", color="red")  grafico de Barras
+barplot(table(base$Species), main="mi primer grafico", col=rainbow(10))
+
+> barplot(table(shuttle$use), col=rainbow(2))
+
+hist(base$Sepal.Width, main="titulo", col="green", density=3, border=30)
+
+
+Scatterplot  o grafico de dispersion  Hay que buscar las dos variables que MAS ABRES los Puntos, o sea con MAS dispersion
+
+plot(base$Sepal.Length,base$Sepal.Width)
+plot(base$Sepal.Length,base$Sepal.Width, col=base$Species, pch=19)  /para separar las especies con colores  (pch es la forma del dibujo)
+teniendo abierto el grafico se puede escribir
+legend('topright', levels(base$Species), col=1:3, lty=1)   //lty 
+legend('topright', levels(base$Species), col=1:3, lty=3)
+
+
+VER  ggplot2  r studio
+
+identify(base$Sepal.Length,base$Sepal.Width) //permite pasar el mouse por los elementos para ver sus datos
+
+
+instalando RGL
+
+   plot3d(base$Sepal.Length,base$Sepal.Width, col=as.Integer(base$Species))
+
+esto grafica un cubo que se puede mover en 3D
+
+si quiero ver dos graficos al mismo tiempo
+
+      par(mfrow=c(1,2)  // particiona en 1 fila y 2 columnas
+      plot(base$Sepal.Length,base$Sepal.Width)
+      plot(base$Petal.Length,base$Petal.Width)
+
+si queremos que la maq sola se de cuenta cuales son las variables que discriman mejor
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ARBOLES DE DESICION
+-------------------
+Entrenar la maq a traves de ejemplos
+
+te dan una muestra de 6 filas con la metadata  ID, Clima, Publicidad, Precio, Redes, Compra
+
+Existe una diferencia entre la POBLACION y la MUESTRA.   La muestra no necesariamnete cumple las mismas reglas que la poblacion.
+Pero cuando se analiza, si se extrapolan estadisticamente los datos, entonces la muestra cumple el mismo comportamiento que la poblacion.
+Para esto la muestra debe ser REPRESENTATIVA.
+Esta muestra es todo el universo para la maq.
+
+
+El mundo de DataMining no es el mismo de Machine Learning
+DM se basa en formulas
+ML se basa en entrenanimiento
+
+En el medio entre las dos tenemos los ARBOLES de DESICION, Dendograma, K-Means
+
+En DataMining hay
+. Regresion Lineal
+. RegLog
+
+En Machine Learning hay
+. Redes Neuronales(Perception, DeepLearning)
+. Support Vector Machines
+
+
+CLIMA    PUBLICIDAD  PRECIO   PublRedes   COMPRA
+Calido   Fuerte      Alto     Poca        Si
+Calido   Fuerte      Alto     Mucha       Si
+Fio      Normal      Bajo     Poca        No
+Fio      Normal      Bajo     Mucha       Si
+Fio      Bajo        Alto     Poca        No
+Templado Fuerte      Alto     Poca        Si
+
+
+         CLIMA
+   calido      frio        templado
+   SI      normal    baja      SI
+        bajo         alto
+      poca mucha     poca
+            SI
+
+
+ID COLOR PINCELADO   MATERIAL ESTILO
+P1  A    Tipo1       Nuevo    renacimiento
+P2  B    Tipo2       Nuevo    renacimiento
+P3  B    Tipo1       Nuevo    renacimiento
+P4  B    Tipo1       Antiguo  moderno
+P5  A    Tipo2       Antiguo  renacimiento
+P6  C    Tipo2       Nuevo    moderno
+
+
+               COLOR
+         A        B        C
+         R  PINCELADO      M
+         Tipo2  Tipo1
+          R    material
+             nuevo  antiguo
+                R      M
+
+
+MODERNO
+. Color=C
+. Color=B ^ Pincelado=Tipo1 ^ Material=Antiguo
+RENACIMIENTO
+. Color=A
+. Color=B ^ Pincelado=Tipo1 ^ Material=Nuevo
+. Color=B ^ Pincelado=Tipo2
+
+
+Nodo  Variable
+Rama  Categoria
+
+
+R
+library(rpart)
+par(mfrow=c(2,1))  //para hacer 2 filas con 1 columna
+par(mfrow=c(1,1))  //para hacer 1 fila  con 1 columna
+
+plot(iris$Sepal.Lenght, iris$Sepal.Width, col=iris$Species)
+plot(iris$Petal.Lenght, iris$Petal.Width, col=iris$Species)
+
+si queremos hacer un arbol de decision para determinar cual es la specie a partir de las variables de IRIS hacemos
+arbol=rpart(Species~Sepal.Length+Sepal.Width+Petal.Length+Petal.Width,iris,method="class")   //si no hace nada esta bien
+
+arbol=rpart(Species~.,iris,method="class")   //hace lo mismo tomando todas las variables sin mencionarlas  OJO que toma el ID
+
+rpart le estamos asignando una formula, base, y que metodo="class"
+. la formula   es la variable a predecir ~  var1+var2+varN
+  . la variable a predecir se llama variable dependiente
+      . si la variable es CUALITATIVA  estamos en un caso de CLASIFICACION
+      . si la variable es CUANTITATIVA estamos en un caso de REGRESION
+
+  . var1+var2+varN         se llama variables independientes o predictoras
+
+para ver el arbol hacemos
+plot(arbol)
+text(arbol)
+
+install.packages("rpart.plot")
+library(rpart.plot)
+rpart.plot(arbol,extra=101,type=4)
+rpart.plot(arbol,extra=101,type=4, shadow.col="gray", branch.lty=5, box.palette="Blue", fallen.leaves=FALSE)
+
+
+
+Como hace la maq para determinar la mejor variable?
+
+la clave es buscar aquellos NODOS que sean homogeneos o puros.  Es el NODO con todos sus elementos pertenecientes a la misma clase o categoria
+o sea, DATOS --> INFORMACION --> CONOCIMIENTO
+no todos los datos tienen informacion
+
+entonces debemos obtener que CANTIDAD de INFORMACION tiene los datos
+FORMULA DE ENTROPIA
+la entropia es el caos, es el lio, de la crisis se obtiene la solucion
+la entropia de la informacion permite obtener los nodos puros
+
+ENTROPIA de Informacion =  - Probabilidad(X) * LOG2(Probabilidad(X))
+
+Lo que buscamos es:  Menor Entropia y Mayor Ganancia de Informacion  para seleccionar las variables del arbol de decision
+
+Ganancia(Clima)
+Ganancia(Publicidad)
+Ganancia(Precio)
+Ganancia(PublicidadRedes)
+
+y de todas estas, la que tenga mayor ganancia es la que empieza el Arbol
+
+Ganancia(Clima) =  Entropia(Sistema) - [Probabilidad(Calido) * Entropia(Calido)] - [Probabilidad(frio) * Entropia(frio)] - [Probabilidad(templado) * Entropia(templado)]
+
+Ganancia(var) = Entropia(Sistema) - SUMATORIA( Prob(clase) * Entropia(clase) ) | para todas las clases
+
+Entropia(Sistema) = Entropia(Variable a predecir)
+
+
+CLIMA    PUBLICIDAD  PRECIO   PublRedes   COMPRA
+Calido   Fuerte      Alto     Poca        Si
+Calido   Fuerte      Alto     Mucha       Si
+Fio      Normal      Bajo     Poca        No
+Fio      Normal      Bajo     Mucha       Si
+Fio      Bajo        Alto     Poca        No
+Templado Fuerte      Alto     Poca        Si
+
+
+Entropia(Sistema) = Entropia(COMPRA) = - Prob(SI) * Log2(Prob(SI)) - Prob(NO) * Log2(Prob(NO)) 
+Clases= SI, NO
+
+ENTROPIA va entre 0 y 1,  0 es muy baja, 1 es muy alta
+
+Entropia(Sistema) = - 4/6 * log2(4/6) - 2/6 log2(2/6) = 0.917 --> es muy alta
+
+Entropia(Calido) = -  2/2 * Log2(2/2) -  0/2 * Log2(0/2) = 0  --> Calido tiene 0 entropia --> entonces es una hoja --> todas las hojas tienen 0 entropia
+Clases= SI, NO
+
+Entropia(Templado) = -  1/1 * Log2(1/1) -  0/1 * Log2(0/1) = 0
+Clases= SI, NO
+
+Entropia(Frio) = -  1/3 * Log2(1/3) -  2/3 * Log2(2/3) = 0.917
+Clases= SI, NO
+
+
+
+Ganancia(Clima) =  Entropia(Sistema) - [Probabilidad(Calido) * Entropia(Calido)] - [Probabilidad(frio) * Entropia(frio)] - [Probabilidad(templado) * Entropia(templado)]
+Ganancia(Clima) =  0.917             -      2/6              * 0                 -      3/6            * 0.917           -       1/6               * 0
+Ganancia(Clima) =  0.917 - 0.5 * 0.917
+Ganancia(Clima) =  0.4585
+
+asi, hacemos la Ganancia(Publicidad), Ganancia(Precio), Ganancia(PublicidadRedes)  y la que tenga ganancia mas alta es el nodo que tomamos
+este proceso se repite cada vez que debemos seleccionar un Nodo
+
+
+
+Algoritmos de Creacion de Arboles de Decision para variables CUALITATIVAS
+. Iterative Dichotomiser 3   ID3   es el que vimos recien
+  selecciona variables con < Entropia y > Ganancia
+
+. CART Clasification and Regretaion Tree
+  selecciona las variables con < Indice de GINI y > Ganancia
+  Indice de GINI = Prob(x).(1-Prob(x))
+
+. RPART  Recursive Partitioning  (es igual a CART e igual a ID3)
+
+
+Algoritmos de Creacion de Arboles de Decision para variables CUANTITATIVAS
+. C4.5 y C5.0 son extensiones de ID3
+. CHAID   ver la interaccion de las variables con la variable a predecir segun una medida estadistica CHI 2
+. QUEST
+.....
+
+
+Tenemos una Base y un Arbol de Decision  -->>  Necesitamos saber si el Arbol que tenemos MODELA y SOLUCIONE lo que queremos resolver
+
+
+EJERCICIO
+---------
+. Abrir la base CRABS de la librerua MASS
+. ver de que trata la base
+. ver variables y cantidad de registros
+. de las 3 variables categoricas dejar solo la especie
+. hacer un grafico de barra de la variable especie
+. hacer un grafico de dispersion de las medidas de los caparazones
+
+> library(help=datasets)
+> library(help=MASS)
+> library(MASS)
+> data(crabs)
+> fix(crabs)
+> summary(crabs)
+> names(crabs)
+> table(crabs$sp)
+> table(crabs$sex)
+> str(crabs)
+
+indice es CUALITATIVA porque no tiene sentido que le saquemos el promedio.  Tiene mucha entropia
+entonces sacamos el atributo index
+> crabs$index=NULL
+> crabs$sex=NULL   lo sacamos en el ejemplo
+> str(crabs)  muestra lo que quedo
+> plot(crabs$sp, crabs$FL, col=crabs$sp)
+> plot(crabs$sp, crabs$RW, col=crabs$sp)
+> plot(crabs$sp, crabs$CL, col=crabs$sp)
+> plot(crabs$sp, crabs$CW, col=crabs$sp)
+> plot(crabs$sp, crabs$BD, col=crabs$sp)
+> barplot(table(crabs$sp), main="crabs", col="green")
+> barplot(table(crabs$sp), main="crabs", col=rainbow(2))
+
+> plot(crabs$CL, crabs$CW, col=crabs$sp)
+> legend("topleft", levels(crabs$sp), col=1:2, lty=1)
+
+> plot(crabs$CL, crabs$CW, col=ifelse(crabs$sp=="B", "blue", "orange"))
+
+
+Si tenemos un universo de datos para modelar,  el tema es cuantos datos utilizamos para armar el arbol y cuantos para probarlo.
+La respuesta se basa en la dispersion de los datos.  Necesitamos la menor cantidad de datos con la maxima dispersion.
+Necesitamos que nuestro sistema pueda GENERALIZAR e INFERIR los casos que nunca vio.
+
+VER ANDREW NG
+
+Nuestro conjunto de Testeo debe ser suficientemente:
+.adecuado en tamano
+. RANDOM
+. adecuado en variedad
+. independiente del conj de entrenamiento
+
+//createDataPartition es una instruccion de CARET
+> install.packages("caret")
+> library(caret)
+> particion=createDataPartition(y=crabs$sp, p=0.8, list=FALSE)   // p=0.8  es el 80%
+> train=crabs[particion, ] 
+> test=crabs[-particion, ]
+> dim(crabs)
+> dim(train)
+> dim(test)
+> table(train$sp)
+> table(test$sp)
+> fix(train)  //hay 160 de 200
+> set.seed(X)  // seteamos una semilla para hacer un random controlado,  esto solo funciona para la instruccion siguiente
+
+> set.seed(8)  // ponemos cualquier numero, luego hacemos la particion para que tome esta seed, ojo que si nos equivocamos en la siguiente instruccion no toma la seed
+> particion=createDataPartition(y=crabs$sp, p=0.8, list=FALSE)
+> train=crabs[particion, ] 
+> test=crabs[-particion, ]
+> fix(train)
+> library(rpart)
+> library(rpart.plot)
+> arbol=rpart(sp~., train, method="class")
+> rpart.plot(arbol, extra=101, type=4, cex=0.8)   // cex es el tipo de letra
+> rpart.plot(arbol, extra=101, type=1, cex=0.8)   // type=1 pones yes/no para entenderlo
+
+B 80 80  te dice que hay 80 blues y 20 oranges,  la B se refiere al primer valor
+
+> arbol    // muestra las ramas
+         n= 160 
+
+         node), split, n, loss, yval, (yprob)
+               * denotes terminal node
+
+          1) root 160 80 B (0.50000000 0.50000000)  
+            2) FL< 17.45 107 35 B (0.67289720 0.32710280)  
+              4) CW>=36.2 29  2 B (0.93103448 0.06896552) *
+              5) CW< 36.2 78 33 B (0.57692308 0.42307692)  
+               10) BD< 12.15 52 10 B (0.80769231 0.19230769)  
+                 20) CW>=29.15 21  0 B (1.00000000 0.00000000) *
+                 21) CW< 29.15 31 10 B (0.67741935 0.32258065)  
+                   42) FL< 11.65 24  4 B (0.83333333 0.16666667) *
+                   43) FL>=11.65 7  1 O (0.14285714 0.85714286) *
+               11) BD>=12.15 26  3 O (0.11538462 0.88461538) *
+            3) FL>=17.45 53  8 O (0.15094340 0.84905660)  
+              6) CW>=44.35 25  8 O (0.32000000 0.68000000)  
+               12) FL< 19.9 7  0 B (1.00000000 0.00000000) *
+               13) FL>=19.9 18  1 O (0.05555556 0.94444444) *
+              7) CW< 44.35 28  0 O (0.00000000 1.00000000) *
+
+> # esto es un comentario
+
+
+> summary(arbol)  // da mucha info del arbol
+
+
+Ahora queremos USAR el arbol - PREDICT
+----------------------------
+> pred=predict(arbol, data.frame(FL= ,RW= ,CL= ,CW= ,BD= ))  //las variables se deben colocar todas,aunque esten en null
+
+> pred=predict(arbol, data.frame(FL=8 ,RW=2, CL=2 ,CW=20 ,BD=2))
+> pred
+          B         O
+1 0.8333333 0.1666667
+
+
+
+> pred=predict(arbol, data.frame(FL=8 ,RW=2, CL=2 ,CW=20 ,BD=2), type="class")
+> pred
+1 
+B 
+Levels: B O
+
+
+Si queremos PREDECIR todos los que estan en Test hacemos
+
+> pred=predict(arbol, test)
+> pred
+             B          O
+9   0.14285714 0.85714286
+11  1.00000000 0.00000000
+14  1.00000000 0.00000000
+25  0.93103448 0.06896552
+30  0.93103448 0.06896552
+34  0.93103448 0.06896552
+35  0.93103448 0.06896552
+37  0.93103448 0.06896552
+41  1.00000000 0.00000000
+49  1.00000000 0.00000000
+54  0.83333333 0.16666667
+62  0.83333333 0.16666667
+68  0.14285714 0.85714286
+76  1.00000000 0.00000000
+85  0.93103448 0.06896552
+90  0.93103448 0.06896552
+92  0.93103448 0.06896552
+96  0.93103448 0.06896552
+99  1.00000000 0.00000000
+100 1.00000000 0.00000000
+104 0.83333333 0.16666667
+109 1.00000000 0.00000000
+110 0.11538462 0.88461538
+112 0.11538462 0.88461538
+114 0.11538462 0.88461538
+116 0.11538462 0.88461538
+117 0.11538462 0.88461538
+125 0.11538462 0.88461538
+126 0.93103448 0.06896552
+130 0.00000000 1.00000000
+134 0.00000000 1.00000000
+141 0.05555556 0.94444444
+145 0.05555556 0.94444444
+147 0.05555556 0.94444444
+152 0.83333333 0.16666667
+162 0.11538462 0.88461538
+170 0.93103448 0.06896552
+173 0.00000000 1.00000000
+178 0.00000000 1.00000000
+188 0.05555556 0.94444444
+> pred=predict(arbol, test, type="class")
+> pred
+  9  11  14  25  30  34  35  37  41  49  54  62  68  76  85  90  92  96  99 100 104 109 110 
+  O   B   B   B   B   B   B   B   B   B   B   B   O   B   B   B   B   B   B   B   B   B   O 
+112 114 116 117 125 126 130 134 141 145 147 152 162 170 173 178 188 
+  O   O   O   O   O   B   O   O   O   O   O   B   O   B   O   O   O 
+Levels: B O
+
+
+
+Ahora si queremos saber cuantos acerto y cuantos se equivoca el arbol, tenemos que armar una Matriz de Confusion
+----------------------------------------------------------------------------------------------------------------
+o sea, Predicho vs Esperado
+
+> table(pred, test$sp)
+    
+pred  B  O
+   B 18  5
+   O  2 15
+
+de los 20 Blue acerto 18 y erro 2
+de los 20 Orange acerto 15 y erro 5
+
+la exactitud de un modelo es los Aciertos / Total      accuracy= (VP + VN) / (VP + VN + FP + FN)
+
+accuracy = (18+15) / (18+15+5+2) = 0.825  --> 82.5%
+
+
+> confusionMatrix(pred, test$sp)
+
+
+sensibilidad (recall) = VP / (VP + FN) = 18/(18+2) = 90%
+
+especificidad =  VN / (VN + FP) = 15/(15+5) = 75%
+
+
+
+TP
+--
+registros x categoria,  diga los registros que hay por cada una de las categorias,  cantidad de registros de cada clase
+
+hay variables cateogoricas y otra numercias,  hay variablas a PREDECIR (USE)
+cuando se usa el AUTOLANDER y cuando no se usa,   tenemos un piloto automatico que a veces se usa y otras veces no.
+Hay que decirle al astronauta cuando usar el AUTOLANDER y cuando NO.
+
+decir de que se trata cada variable,  decir esta variable significa xxxx
+buscar en internet de que se trata el ejercicio,  poner alguna fotografia
+
+cantidad de registros es = a cantidad de casos
+cantidad de registros de cada clase,  cuantos son AUTOLander y cuanto NO son Autolander
+
+Hacer un Table de la base de la variable a predecir
+table(base$variabPred)
+  Clase1  Clase2
+    n1      n2
+
+Summary tmb hace lo mismo
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+REDES NEURONALES
+----------------
+En R los comandos basicos son:
+
+         library(nnet)
+         # particionamos la base en train y test
+         library(caret)
+         set.seed(8)
+         particion=createDataPartition(y=iris$Species, p=0.8, list=FALSE)
+         train=iris[particion, ]
+         test=iris[-particion, ]
+         # creamos la red neuronal
+         library(nnet)
+         set.seed(8)
+         red=nnet(Species~., train, size=4, maxit=5000)    #  size es la cantidad de neuronas en la capa oculta   maxit es la cantidad de iteraciones (default es 100)
+         pred=predict(red, test, type="class")
+         # para redes neuronales confusionMatrix lleva factor
+         confusionMatrix(factor(pred), test$Species)  # hay que instalar el paquete M71
+
+
+SINAPSIS:  una neurona cuando decide que la info es importante la transmite
+
+
+Una red neuronal artificial se separa en capas
+. capa de entrada
+. capa oculta
+. capa de salida
+
+ver slide 5  PERCEPTRON
+-----------------------
+una neurona artificial tiene
+dendritas   (ENTRADA)
+axon        (SALIDA)
+telendron   (Conecta con el resto de las neuronas)
+
+el PERCEPTRON la info siempre va hacia la derecha  // red FeedForward
+
+la capa de entrada : tiene neuronas x la cantidad de variables predictoras
+la capa de salida  : tiene neuronas x la salida esperada de la variable a predecir
+la capa oculta     : tiene neuronas (no se sabe cuantas)
+
+NO hay conexiones con neuronas de la misma capa
+
+se arma una MATRIX de pesos SINAPTICOS   W
+
+los pesos sinapticos la primera vez es la azar
+
+RED
+. capa entrada 4
+. capa oculta  3
+. capa salida  1
+
+MATRIX de pesos SINAPTICOS
+. Arquitectura
+    1  2  3  4  5   6   7   8 
+1              0.8 0.7 0.3
+2              0.3 0.3 0.2
+3              0.1 0.2 0.3
+4              0.8 0.8 0.7
+5                          0.5
+6                          0.5
+7                          0.8
+8
+
+
+cuando tengo una poblacion se puede dividir graficamente por
+. una linea                       Regresion Logistica
+. una separacion por regiones     Arboles de decision  CAJA BLANCA
+. cuando hay clases demasiado mezcladas que no se pueden definir lineas, se utilizan redes neuronales  CAJA NEGRA
+  . esto permite clasificar atomicamente
+. Entrenamiento
+  . tenemos 2 tipos de funciones PAT
+    . Propagacion                 : hallo o encuentro la funcion de las neuronas
+    . Activacion o Transferencia  : hallo o encuentro el valor final
+
+
+Sumpongamos que tenemos los datos de IRIS
+Sepal.Len    : 5.1
+Sepal.Width  : 3.5
+Petal.Len    : 1.4
+Petal.Width  : 0.2
+
+estos 4 valores los colocamos en la capa de entrada de la red
+hacemos la suma de productos ponderados
+
+Neurona 5 = 5.1*0.8 + 3.5*0.3 + 1.4*0.1 + 0.2*0.8 = 5.43
+Neurona 6 = 5.1*0.7 + 3.5*0.3 + 1.4*0.2 + 0.2*0.8 = 5.06
+Neurona 7 = 5.1*0.3 + 3.5*0.2 + 1.4*0.3 + 0.2*0.7 = 2.79
+Neurona 8 = 5.43*0.5 + 5.06*0.5 + 2.79*0.8        = 7.477
+ 
+se barren todo el set del train y por cada uno si da bien sigue, si da mal ajusta y sigue
+el ajuste se hace con el concepto de BACK PROPAGATION
+cada vuelta es un Iteracion o Epoca   y repite hasta que
+. TODOS los casos da bien
+. hasta una COTA de ERROR ACEPTADA
+. Cantidad de Iteraciones
+
+
+
+PERCEPTRON SIMPLE  -->  NO TIENE CAPA OCULTA
+
+AND
+x1 x2 y
+0  0  0
+0  1  0
+1  0  0
+1  1  1
+
+Pesos 0.5
+
+y = 0*0.5 + 0*0.5 = 0
+y = 0*0.5 + 1*0.5 = 0.5
+y = 1*0.5 + 0*0.5 = 0.5
+y = 1*0.5 + 1*0.5 = 1
+
+como no me da, entonces agregamos una FUNCION DE ACTIVACION o FUNCION DE TRANSFERENCIA
+entonces se define un UMBRAL  ej= si < 0.8 es 0
+
+
+
+Cuando tenemos una Capa Oculta  tenemos un PERCEPTRON MULTIPLE
+
+RED
+. entrada 3  X1, X2, X3
+. oculta  2  OC1, OC2
+. salida  1  S
+
+Notacion del libro de HERTZ
+
+OC1 = X1 * W x1 Oc1 + X2 * W x2 Oc1 + X3 * W x3 Oc1
+OC2 = X1 * W x1 Oc2 + X2 * W x2 Oc2 + X3 * W x3 Oc2
+
+   Generalizando
+
+   Ocj = SUM(Xi * Wi Cj)  para i=1, N  con N=cantidad de neuronas en la capa de entrada
+
+
+la Neurona de Salida
+S = g(Oc1 * W Oc1 S + Oc2 * W Oc2 S)   la g es una funcion de activacion
+
+   Generalizando
+
+   S = g( SUM(Ocj * W Ocj S))  para j=1, M  con M=cantidad de neuronas en la capa de oculta
+
+
+Entonces se puede calcular el error que es las veces que se equivoca
+
+   Error cuadratico = SUM ( (Esperado - Predijo la Red) ^ 2 )
+
+   Error cuadratico = SUM ( (Yi - Si) ^ 2 )
+
+   Error cuadratico = SUM ( (Yi - g( SUM(Ocj * W Ocj S))) ^ 2 )
+
+   Error cuadratico = SUM ( (Yi - g( SUM(SUM(Xi * Wi Cj) * W Ocj S))) ^ 2 )
+
+A medida que se itera lo que se busca es que el error BAJE, entonces BACK PROPAGATION calcula con la DERIVADA del ERROR con respecto a W
+
+
+Back Propagation = - n * der(Error)/der(W)   donde n es un coeficiente de aprendizaje
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+. Abrir la base crabs(MASS)
+. de las 3 variables categoricas, solo dejar SP
+. Particionar en 75%
+. hacer el arbol de decision
+. hacer una red neuronal con 2 neuronas en capa oculta
+
+
+#
+# CRABS
+#
+library(MASS); library(caret); library(rpart); library(rpart.plot)
+summary(crabs)
+# usar solamente crabs$SP,  borrar las otras dos variables categoricas
+crabs$index=NULL
+crabs$sex=NULL
+set.seed(8)
+particion=createDataPartition(y=crabs$sp, p=0.75, list=FALSE)
+train=crabs[particion, ] 
+test=crabs[-particion, ]
+arbol=rpart(sp~., train, method="class")
+rpart.plot(arbol, extra=101, type=4, cex=0.8)
+pred=predict(arbol, test, type="class")
+confusionMatrix(pred, test$sp)
+#---------------------------
+library(nnet)
+set.seed(8)
+red=nnet(sp~., train, size=2, maxit=5000)
+pred=predict(red, test, type="class")
+library(caret)
+confusionMatrix(factor(pred), test$sp)
+
+          Reference
+Prediction  B  O
+         B  0  1
+         O 25 24
+                    
+vemos que con 2 neuronas tiene sensibilidad = 0
+               Accuracy : 0.48            
+                 95% CI : (0.3366, 0.6258)
+    No Information Rate : 0.5             
+    P-Value [Acc > NIR] : 0.6641          
+                                          
+                  Kappa : -0.04           
+                                          
+ Mcnemar's Test P-Value : 6.462e-06       
+                                          
+            Sensitivity : 0.0000          
+            Specificity : 0.9600 
+
+library(NeuralNetTools)
+plotnet(red)
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+RED NEURONAL CONVOLUCIONAL - DEEPLEARNING
+
+. Capa de Entrada
+. Capa de Salida
+. VARIAS capas ocultas
+
+
+nnet solo permite colocar 1 sola capa oculta  (Perceptron multiple)
+
+Neuronas en capa de entrada  -->  son las variables predictoras
+Neuronas en capa de salida   -->  variable a predecir
+
+// red da info de como esta conformada la red
+> red
+a 5-3-1 network with 22 weights
+inputs: FL RW CL CW BD 
+output(s): sp 
+options were - entropy fitting 
+
+// para ver los pesos de la red hacemos SUMMARY
+> summary(red)
+a 5-3-1 network with 22 weights
+options were - entropy fitting 
+ b->h1 i1->h1 i2->h1 i3->h1 i4->h1 i5->h1 
+ -1.90  18.95   8.02   1.07 -19.36  19.69 
+ b->h2 i1->h2 i2->h2 i3->h2 i4->h2 i5->h2 
+ -0.29   0.63   0.40   0.26   0.01  -0.55 
+ b->h3 i1->h3 i2->h3 i3->h3 i4->h3 i5->h3 
+ -0.09   0.06  -0.51   0.60  -0.70  -0.33 
+  b->o  h1->o  h2->o  h3->o 
+ -7.61  29.09  -7.68  -0.13 
+> 
+      i input
+      h hidden oculta
+      b bias  --> son 2 neuronas que agrega nnet en la capa oculta B1 y otra en la capa de salida B2. Aparecen cuando necesita valores iniciales. Lo usa el NNET pero otras no lo usan
+
+
+NeuralNet es otra libreria que hace lo mismo que NNET.  El tema es que NeuralNet es muy lenta y no da tan buenos resultados como NNET.
+NNET es muy superior
+
+
+names(red)  da mucha informacion
+
+> names(red)
+ [1] "n"             "nunits"        "nconn"         "conn"          "nsunits"       "decay"        
+ [7] "entropy"       "softmax"       "censored"      "value"         "wts"           "convergence"  
+[13] "fitted.values" "residuals"     "lev"           "call"          "terms"         "coefnames"    
+[19] "xlevels"      
+> 
+
+si quiero la matriz de pesos sinapticos, los pesos los encuentro en "wts"
+
+> red$wts
+ [1]  -1.899959266  18.950859735   8.020063870   1.067231400 -19.363825089  19.694952607  -0.290296071
+ [8]   0.628604503   0.400246040   0.256678972   0.005809041  -0.554799483  -0.094665749   0.062798807
+[15]  -0.506533365   0.598787772  -0.698283865  -0.329874304  -7.611794267  29.087874430  -7.677250512
+[22]  -0.128799210
+> 
+
+
+MATRIX de pesos SINAPTICOS
+. Arquitectura
+    1  2  3  4  5   6   7   8   9
+1              0.2 0.2 0.2
+2              0.2 0.3 0.3
+3              0.1 0.2 0.2
+4              0.2 0.8 0.2
+5                          0.3 0.5
+6                          0.3 0.7
+7                          0.2 0.1
+8
+9
+
+
+Para dibujar la red entonces debemos saber las capas.
+
+. entrada:  1, 2, 3, 4  porque son las que se conectan con las ocultas
+
+. oculta: 5, 6 y 6  porque son las que se conectan con la salida
+
+. salida : tenemos 2 neuronas 8 y 9 porque no estan conectadas con nadie
+
+
+Importante
+----------
+Arbol de decision   importan  las reglas
+Redes Neuronales    importan  la matriz de pesos sinapticos
+
+
+
+
+Ver pagna UCI DATASET  es de la universidad de california
+
+UCI MACHINE LEARNING REPOSITORY
+hay info para conectarse,  hay mas de 400 base de datos para utilizar
+
+
+UCI SONAR DATASET   Connectionnist Bench
+esta base tiene Data Folder y 
+bajar SONAR ALL DATA
+      getwd()
+      setwd()
+      tratar de abrir archivos CSV
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+REALIZAR
+LIBRERIAS -->  instalar TM y WORLDCLOUD
+install.packages(tm)
+install.packages(worldcloud)
+
+. summary(base)  nos da la estadistica y tmb la cantidad de elementos en cada clase
+. cuando tengo pocos datos,  poca cantidad de cada clase, entonces el p lo tomo a 0.70 para que queden algunos datos para poder hacer el test
+. si aumentamos la cantidad de neuronas puede mejorar o se puede sobrecargar la red y empeorar
+. analizar si alguna clase no tenga sentido utilizarla, entonces se puede
+  . sacar alguna clase para mejorar la red neuronal
+  . juntar algunas clases en "otras"
+  . cambiar la semnilla
+  . probar con un arbol de decision
+    . para sacar una clase hacemos
+
+library(mlbench); library(caret); library(nnet); library(NeuralNetTools)
+data(Glass)
+summary(Glass)
+set.seed(8)
+particion=createDataPartition(y=Glass$Type, p=0.70, list=FALSE)
+train=Glass[particion, ] 
+test=Glass[-particion, ]
+set.seed(8)
+red=nnet(Type~., train, size=62, maxit=5000)
+pred=predict(red, test, type="class")
+confusionMatrix(factor(pred), test$Type)
+plotnet(red)
+
+
+. cuando no sabemos como seguir nos conviene graficarlo para entender los datos  y saber si estamos en un caso lineal o no lineal
+. recordemos que el arbol sirve para caso lineales y las redes para lineal y no lineal
+. cuando tenemos varias variables, haciendo redes neuronales tomando "algunas" y vemos que la exactitud mejora o da 1 es suficiente
+
+
+doodle google bach
+RPUBS.COM
+Joaquin Blogs
+
+
+
+DeepLearning
+. Red neuronal con VARIAS CAPAS OCULTAS
+. cada capa se ESPECIALIZA en "algo"
+. nnet permite solo 1 capa oculta
+. ver H2O
+. tensorflow: permite varas capas
+
+www.playground.tensorflow.org
+
+Dream Neural Network
+. los suenios de las redes neuronales son las imagenes que se arman en cada capa oculta
+
+
+APRENDIZAJE NO SUPERVISADO
+--------------------------
+hasta ahora tenemos un dataset con un conjunto de variables  y  una variable a predecir  --> Aprendizaje Supervisado porque tenemos una variable que va supervisando el aprendizaje
+. si la variable a predecir es
+  . cuantitativa   REGRESION
+  . cualitativa    CLASIFICACION
+
+si no tenemos variable a predecir --> entonces tenemos el caso del Aprendizaje No Supervisado
+En estos casos, no predecimos, sino que DESCRIPTION
+. se arman grupos que finalmente seran las Clases determinando "creando" la variable a predecir
+
+Tecnica: Agrupamiento  CLUSTERING
+. K-Means
+. Dendograma
+. Kohonen (KONEN)  es una red neuronal muy potente 
+
+
+K-MEANS
+-------
+. el objetivo es separar la poblacion en grupos partiendo de varias variables y la cantidad de grupos que quiero
+1. definimos la cantidad de grupos
+2. se crean centroides al azar   (punto en el dominio de la poblacion)
+3. se forman los grupos con los elementos mas cercanos a cada centroide
+4. se recalculan los centroides buscando el centro de cada grupo formado, disminuyen las distancias.
+5. Se itera desde el item 3 hasta que converge
+
+la distancia que se toma desde los elementos a los centroides es la EUCLIDEana
+
+Ejemplo, tenemos una base de animales con los pesos de sus cuerpos y cerebros
+> library(MASS)
+> data(mammals)
+> dim(mammals)
+[1] 62  2
+> summary(mammals)
+      body              brain        
+ Min.   :   0.005   Min.   :   0.14  
+ 1st Qu.:   0.600   1st Qu.:   4.25  
+ Median :   3.342   Median :  17.25  
+ Mean   : 198.790   Mean   : 283.13  
+ 3rd Qu.:  48.203   3rd Qu.: 166.00  
+ Max.   :6654.000   Max.   :5712.00  
+> head(mammals)
+                   body brain
+Arctic fox        3.385  44.5
+Owl monkey        0.480  15.5
+Mountain beaver   1.350   8.1
+Cow             465.000 423.0
+Grey wolf        36.330 119.5
+Goat             27.660 115.0
+
+set.seed(8)
+km=kmeans(mammals,3)  # separo en 3 grupos
+names(km)             # nos muestra las propiedades que podemos utilizar
+km$size               # nos dice la cantidad de animales en los 3 grupos
+km$cluster            # nos muestra los elementos que quedaron en cada grupo
+
+> names(km)
+[1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss" "betweenss"    "size"        
+[8] "iter"         "ifault"      
+> km$size
+[1]  2  8 52
+> 
+> km$cluster
+               Arctic fox                Owl monkey           Mountain beaver                       Cow 
+                        3                         3                         3                         2 
+                Grey wolf                      Goat                  Roe deer                Guinea pig 
+                        3                         3                         3                         3 
+                   Verbet                Chinchilla           Ground squirrel    Arctic ground squirrel 
+                        3                         3                         3                         3 
+African giant pouched rat Lesser short-tailed shrew           Star-nosed mole     Nine-banded armadillo 
+                        3                         3                         3                         3 
+               Tree hyrax              N.A. opossum            Asian elephant             Big brown bat 
+                        3                         3                         1                         3 
+                   Donkey                     Horse         European hedgehog              Patas monkey 
+                        2                         2                         3                         3 
+                      Cat                    Galago                     Genet                   Giraffe 
+                        3                         3                         3                         2 
+                  Gorilla                 Grey seal              Rock hyrax-a                     Human 
+                        2                         3                         3                         2 
+         African elephant             Water opossum             Rhesus monkey                  Kangaroo 
+                        1                         3                         3                         3 
+    Yellow-bellied marmot            Golden hamster                     Mouse          Little brown bat 
+                        3                         3                         3                         3 
+               Slow loris                     Okapi                    Rabbit                     Sheep 
+                        3                         2                         3                         3 
+                   Jaguar                Chimpanzee                    Baboon           Desert hedgehog 
+                        3                         2                         3                         3 
+          Giant armadillo              Rock hyrax-b                   Raccoon                       Rat 
+                        3                         3                         3                         3 
+         E. American mole                  Mole rat                Musk shrew                       Pig 
+                        3                         3                         3                         3 
+                  Echidna           Brazilian tapir                    Tenrec                 Phalanger 
+                        3                         3                         3                         3 
+               Tree shrew                   Red fox 
+                        3                         3 
+> 
+km$cluster[km$cluster==1] # muestra los elementos del grupo 1
+km$cluster[km$cluster==2] # muestra los elementos del grupo 2
+
+> km$cluster[km$cluster==1]
+  Asian elephant African elephant 
+               1                1 
+> km$cluster[km$cluster==2] # muestra los elementos del grupo 2
+       Cow     Donkey      Horse    Giraffe    Gorilla      Human      Okapi Chimpanzee 
+         2          2          2          2          2          2          2          2 
+> 
+
+PARA GRAFICARLOS
+----------------
+attach(mammals)
+plot(body, brain)
+identify(body, brain, labels=row.names(mammals))
+plot(body, brain, col=km$cluster)
+points(km$centers[ , c("body", "brain")], col=1:3, pch=8, cex=2)       # muestra los centroides
+> km$centers                   # da los promedios
+        body      brain
+1 4600.50000 5157.50000
+2  284.15750  604.12500
+3   16.35998   46.27538
+
+Lo importante de KMEANS
+. ver la cantidad de elementos por grupos    SIZE
+. ver que elementos quedaron en cada grupo   CLUSTER
+. caracterizar cada grupo
+  . ver centroides  (km$centers)
+  . plot
+  . boxplot
+  . barplot de los centroides
+
+barplot(km$center[ , 1], main="Centroides body")
+barplot(km$center[ , 2], main="Centroides brain")
+
+# permite ver si la mediana de cada grupo esta bien diferenciada
+boxplot(body~km$cluster)
+
+KMEANS no sirve para predecir,  solo permite SEPARAR en grupos de elementos existentes
+si tengo un nuevo elemento, tengo que agregarlo y volver a calcular los centroides con KMEANS
+
+# separo en 3 grupos haciendo 20 kmeans siempre random y toma la mejor clasificacion
+km=kmeans(mammals, 3, nstart=20)
+. esto busca lo mas 
+  . HOMOGENEO dentro de c/grupo
+    . Se calcula como la suma de la distancia de los elementos con su centroide
+    . "withinss"
+    . la suma de todos es  "totwithinss"
+  . HETEROGENEO entre los grupos
+    . la separacion de los grupo es   "betweenss"
+> names(km)
+[1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss" "betweenss"    "size"        
+[8] "iter"         "ifault"      
+> km$withinss
+[1]  935578.1  324429.7 9048665.0
+> km$withinss
+[1]  935578.1  324429.7 9048665.0
+> km$tot.withinss
+[1] 10308673
+> km$betweenss
+[1] 91799474
+
+
+
+DENDOGRAMA
+----------
+. calcula una matriz de distancias entre todos los elementos de la poblacion
+
+    1  2  3  4  5
+1   0
+2      0
+3         0
+4            0
+5               0
+
+. todo lo que esta abajo de la diagonal es simetrico entonces no se usa
+. cuando encuentra elementos que estan cerca los va agrupando
+. vuelve a iterar
+
+luego hace un grafico donde se muestra los elementos cercanos
+
+dendo=hclust(dist(mammals))
+plot(dendo)
+plot(dendo, hang=-1) # los muestra en la misma linea
+rect.hclust(dendo, k=5, border="red")
+grupos=cutree(dendo, k=5)
+grupos
+               Arctic fox                Owl monkey           Mountain beaver                       Cow 
+                        1                         1                         1                         2 
+                Grey wolf                      Goat                  Roe deer                Guinea pig 
+                        1                         1                         1                         1 
+                   Verbet                Chinchilla           Ground squirrel    Arctic ground squirrel 
+                        1                         1                         1                         1 
+African giant pouched rat Lesser short-tailed shrew           Star-nosed mole     Nine-banded armadillo 
+                        1                         1                         1                         1 
+               Tree hyrax              N.A. opossum            Asian elephant             Big brown bat 
+                        1                         1                         3                         1 
+                   Donkey                     Horse         European hedgehog              Patas monkey 
+                        1                         2                         1                         1 
+                      Cat                    Galago                     Genet                   Giraffe 
+                        1                         1                         1                         2 
+                  Gorilla                 Grey seal              Rock hyrax-a                     Human 
+                        1                         1                         1                         4 
+         African elephant             Water opossum             Rhesus monkey                  Kangaroo 
+                        5                         1                         1                         1 
+    Yellow-bellied marmot            Golden hamster                     Mouse          Little brown bat 
+                        1                         1                         1                         1 
+               Slow loris                     Okapi                    Rabbit                     Sheep 
+                        1                         1                         1                         1 
+                   Jaguar                Chimpanzee                    Baboon           Desert hedgehog 
+                        1                         1                         1                         1 
+          Giant armadillo              Rock hyrax-b                   Raccoon                       Rat 
+                        1                         1                         1                         1 
+         E. American mole                  Mole rat                Musk shrew                       Pig 
+                        1                         1                         1                         1 
+                  Echidna           Brazilian tapir                    Tenrec                 Phalanger 
+                        1                         1                         1                         1 
+               Tree shrew                   Red fox 
+                        1                         1 
+
+nueva=cbind(mammals, grupos)   # para ver una tabla con cada elemento en que grupo pertenece
+fix(nueva)
+
+
+IMAGENES
+--------
+poder tener una base de datos
+
+una imagen es un conjunto de pixeles y lo que quiero es armar un datasets con las distintas variables y las variables a predecir
+entonces hay que convertir los pixeles en un datasets
+
+install.packages(JPEG)
+library(jpeg)
+x=c(0,0,0,0,0,0,0,0,0,0)
+y=c(0,0,0,0,0,0,0,0,0,0)
+z=c(0,0,0,0,0,0,0,0,0,0)
+imagen=cbind(x,y,z)
+imagen   #imagen formada por 0,0,0
+
+writeJPEG(imagen, "imagen.jpg")  #crea un file
+
+en jpg el 0 negro y 1 blanco,  en el medio estan los grises
+y=c(1,1,1,1,1,1,1,1,1,1)
+z=c(0,0,0,0,0,0.5,0.5,0.5,0.5,0.5)
+imagen=cbind(x,y,z)
+writeJPEG(imagen, "imagenGRIS.jpg")
+
+
+para hacer colores, necesitamos 3 datos por pixels.  o sea tenemos 3 versiones para cada uno  R G B
+las 3 columnas las pegamos en una sola
+
+x=c(0,0,0,0,0,0,0,0,0,0)  //RED
+y=c(1,1,1,1,1,1,1,1,1,1)  //GREEN
+z=c(0,0,0,0,0,0,0,0,0,0)  //BLUE
+
+para pegotearlas, hacemos
+imagenVerde=array(c(x,y,z), dim=c(10,1,3))   
+      10 fila
+      1 columna
+      3 colores pegados
+una unica de 10 en 3 colores
+
+writeJPEG(imagenVerde, "imagenVERDE.jpg")
+
+
+para hacer al reves, o sea, obtener el dataset a partir de una imagen hacemos
+
+. en el properties del file vemos el tamanio,  por ejemplo 255x255
+
+imagen=readJPEG("file.jpg")
+dim(imagen)
+225 225 3   o sea mide 225x225 en 3 colores
+
+de las 3 imagenes (una de cada color) lo que se hace es generar una sola imagen, se puede dejar una sola u obtener el promedio de las 3
+
+imagen[,,2]=0
+imagen[,,3]=0
+
+entonces imagen nos quedo en rojo
+writeJPEG(imagen, "rojo.jpg")
+
+gris=(imagen[,,1] + imagen[,,2] + imagen[,,3]) / 3 
+writeJPEG(gris, "gris.jpg")
+
+
+imagenIluminada = 0.2126 R + 0.7152 G + 0.0722 B  segun grayscale
+il = 0.2126 * imagen[,,1] + 0.7152 * imagen[,,2] + 0.0722 * imagen[,,3]
+writeJPEG(il, "il.jpg")
+
+finalmente, transformo la matriz en un vector
+
+vector=array(il)
+dim(vector)
+
+luego hacemos un KMEANS, DENDOGRAMA o una red neuronal diciendo que estas imagenes es un pajaro
+
+> base$Class=NULL
+> head(base)
+
+  Comp Circ D.Circ Rad.Ra Pr.Axis.Ra Max.L.Ra Scat.Ra Elong Pr.Axis.Rect Max.L.Rect Sc.Var.Maxis Sc.Var.maxis
+1   95   48     83    178         72       10     162    42           20        159          176          379
+2   91   41     84    141         57        9     149    45           19        143          170          330
+3  104   50    106    209         66       10     207    32           23        158          223          635
+4   93   41     82    159         63        9     144    46           19        143          160          309
+5   85   44     70    205        103       52     149    45           19        144          241          325
+6  107   57    106    172         50        6     255    26           28        169          280          957
+
+  Ra.Gyr Skew.Maxis Skew.maxis Kurt.maxis Kurt.Maxis Holl.Ra
+1    184         70          6         16        187     197
+2    158         72          9         14        189     199
+3    220         73         14          9        188     196
+4    127         63          6         10        199     207
+5    188        127          9         11        180     183
+6    264         85          5          9        181     183
+
+
+TP
+--
+library(MASS)
+data(crabs)
+str(crabs)
+crabs$index=NULL
+crabs$sex=NULL
+crabs$sp=NULL
+set.seed(8) #como tiene azar para empezar a ubicar los centroides ponemos seed
+km=kmeans(crabs,2) #kmeans necesita variables numericas
+km$size  #cantidad de elementos por grupos
+summary(crabs) 
+km$cluster
+#imagenes de los centroindes (representan el elemento promedio de cada grupo)
+km$centers  # se muestran los numeros
+#
+#grafico de dispersion de 2 variables
+attach(crabs)
+plot(FL, RW, col=km$cluster)
+points(km$centers[ , c("FL", "RW")])
+legend("topleft", levels(factor(km$cluster)), lty=1, col=1:2)
+# en R  siempre c(fila, columna) entonces [, c()]  es todas las filas tomando las columnas("")
+points(km$centers[,c("FL", "RW")], col=c("green", "blue"), pch=8, cex=3)
+km$cluster[4] # Dice a que grupo pertenece el elemento 4
+#
+# caracterizar los grupos
+# 1. grupo mas compacto  within mas chico
+# 2. los cangrejos del grupo 1 son mas chicos que los del grupo 2
+# 3. el ancho del caparazon del grupo 1 es < que el del grupo 2
+# 4. relacion de los centroides, se puede dar que cada grupo este separado del otro
+# 5. 
+boxplot(FL~km$cluster)
+boxplot(RW~km$cluster)
+boxplot(CL~km$cluster)
+boxplot(CW~km$cluster)
+boxplot(BD~km$cluster)
+#--------------------------------------
+baseNueva=cbind(base, km$cluster) #agrega una columna al final
+names(baseNueva)[names(baseNueva)=="km$cluster"]="Grupos"
+names(baseNueva)
+#--------------------------------------
+barplot(km$center[ , 1], main="Centroides FL")
+barplot(km$center[ , 2], main="Centroides RW")
+barplot(km$center[ , 3], main="Centroides CL")
+barplot(km$center[ , 4], main="Centroides CW")
+barplot(km$center[ , 5], main="Centroides BD")
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+TRANSFORMACION DE VARIABLES:  llevar las variables a la misma escala
+---------------------------
+
+ESCALAR VARIABLES
+. Normalizacion
+. Estandarizacion
+. Tipificacion
+
+esto permite comparar entre distintas cosas
+
+[Variable - mean(Var)] / DesvioEstandard   #mean media
+
+
+si queremos 10 numeros cerca del 20 y que esten alrededor de 0.5
+x=rnorm(10, 20, 0.5)
+
+si queremos 10 numeros cerca del 3 y que esten alrededor de 0.5
+y=rnorm(10, 3, 0.5)
+
+base2=cbind(x,y)
+
+
+si ahora queremos centrarlas alrededor del 0 hacemos un SCALE
+
+base3=scale(base2)
+
+
+
+VARIABLES DUMMY: transformar variables CATEGORICAS a numericas
+que pasa si en la base tenemos variables CATEGORICAS?  (SEXO, ESPECIES, etc...)
+o sea,  si la queremos poner en KMEANS necesitamos numeros
+
+Usamos si o si 0 y 1
+
+Ejemplos:  Tenemos SP,   SP1 y SP2
+
+          SP1   SP2
+ORANGE     1     0
+BLUE       0     1
+
+
+
+1 variable con 2 clases -->  1 var Dummy
+1 variable con 3 clases -->  2 var Dummy
+1 variable con 4 clases -->  3 var Dummy   aunque con 2 alcanzaria
+
+         var1  var2
+clase1    0     0
+clase2    1     0
+clase3    0     1
+
+
+# crear variables Dummy para una var categorica
+library(nnet)
+class.ind(iris$Species)
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+REGRESION
+---------
+
+Si la variable a predecir es
+. CUALITATIVA --> CLASIFICACION
+. CUANTITATIVA --> REGRESION   valor del dolar la semana que viene
+
+
+Si quiero predecir el tiempo de viaje en funcion a la distancia.  Entonces armo una base de casos, luego la grafico,  entonces quiero predecir cuanto tiempo voy a tardar a un lugar que nunca fui
+
+Se utiliza una regresion lineal, recta que pasa por todos los puntos lo mas cercano posible. 
+
+
+
+LINEAL MODEL,   lm  en R   es la instruccion que hace una regresion lineal
+
+si las variables tienen forma de recta se encuentran correlacionadas linealmente.  Hay que fijarse los OUTLIERS,  entonces antes de hacer la regresion hay que sacar los OUTLIERS
+
+
+# Si queremos predecir cuanto pesa el cerebro de un animal a partir del peso del cuerpo
+library(MASS)
+base=mammals
+names(base)
+plot(base$body, base$brain)
+# busco los outliers
+# los saco
+identify(base$body, base$brain, labels=row.names(base))
+base=base[-33,]
+base=base[-19,]
+plot(base$body, base$brain)
+#
+# buscamos la correlacion de la base
+cor(base)
+# vemos que esta en 0,65
+# sacamos el Human
+base=base[-31,]
+# buscamos la correlacion de la base
+cor(base)
+# vemos que mejoro a 0.88
+# lo aceptamos entonces hacemos la regresion
+plot(base$body, base$brain)
+reg=lm(brain~body, base)
+abline(reg) # grafica la reca
+
+
+
+Una regresion lineal es SOLO PARA modelos lineales   y   solo casos de Regresion                                                       Devuelve un NRO
+
+Una arbol de decision RPART  es valido para modelos lineales como para modelos NO lineales   y  tmb para Clasificacion y Regresion     Devuelve el promedio de la Hoja
+
+Una Red Neuronal NNET  es valida para modelos lineales y No lineales  y  tmb para Clasificacion y Regresion                            Devuelve un NRO
+
+
+
+En Clasificacion   usamos la   matriz de confusion
+En Regresion       usamos el   Error Cuadratico Medio
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+install.packages("tm")
+install.packages("worlcup")
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#--------------------------------------
+# CROSS VALIDATION
+#--------------------------------------
+library(MASS)
+data(painters)
+# la idea es predecir a que escuela pertenece un pintor a partir de una pintura de el
+fix(painters)
+library(rpart)
+library(rpart.plot)
+dim(painters)
+table(painters$School)
+# cuando hay poco datos es muy dificil hacer una base para train y otra para test
+# entonces se hace CROSSVALIDATION
+# . siempre es necesario testear el modelo
+# . tomamos el modelo y lo dividimos en 10 partes al azar
+# . creo 10 modelos a partir de cada parte.  Cada modelo puede ser un ArbolDecision o RedNeuronal
+# . en cada modelo, divido por 10 y tomo una parte para test
+# . en cada modelo, tomo partes diferentes para test
+#  cada uno de estos partes de Test de cada modelo se llama FOLDs
+> library(caret)
+> folds=createFolds(y=iris$Species, 10)
+> folds
+$Fold01
+ [1]  14  17  20  34  41  54  80  83  87  90 106 109 111 120 149
+
+$Fold02
+ [1]  11  23  27  38  49  56  57  70  75  76 116 122 129 135 142
+
+$Fold03
+ [1]   2   4  10  35  40  51  62  66  85  89 101 124 126 136 141
+
+$Fold04
+ [1]   5  12  26  33  48  81  91  94  98 100 104 107 123 143 145
+
+$Fold05
+ [1]   1   8  28  29  32  61  69  78  96  99 105 127 130 139 140
+
+$Fold06
+ [1]   9  39  44  45  47  60  63  79  86  97 115 125 128 134 144
+
+$Fold07
+ [1]   3  15  16  30  46  58  59  68  71  72 121 131 138 147 148
+
+$Fold08
+ [1]   6  13  24  31  43  55  64  73  82  84 103 112 113 133 150
+
+$Fold09
+ [1]   7  18  22  36  50  52  65  67  77  93 102 110 114 117 132
+
+$Fold10
+ [1]  19  21  25  37  42  53  74  88  92  95 108 118 119 137 146
+
+
+Luego hacemos los conjuntos de Reds (modelos) y los predict  de cada Parte
+
+test01=iris[folds$Fold01,]
+train01=iris[-folds$Fold01,]
+red01=nnet(Species~, train01, ...)
+pred01=predict(red01, test01,, type="class")
+
+test02=iris[folds$Fold02,]
+train02=iris[-folds$Fold02,]
+red02=nnet(Species~, train02, ...)
+pred02=predict(red02, test02,, type="class")
+......
+
+
+CROSS VALIDATION  como se utiliza
+
+#
+# CROSS VALIDATION
+#
+   library(caret)
+   trControl=trainControl(method="cv", number=10)
+   tuneGrid=expand.grid(size=4, decay=0)    #size cantidad de neuronas en capa oculta
+   modelo=train(Species~., iris, trControl=trControl, tuneGrid=tuneGrid, method="nnet", maxit=5000)
+# esto hizo el cross validation con todas las redes neuronales en cada modelo
+> modelo
+Neural Network 
+
+150 samples
+  4 predictor
+  3 classes: 'setosa', 'versicolor', 'virginica' 
+
+No pre-processing
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 135, 135, 135, 135, 135, 135, ... 
+Resampling results:
+
+  Accuracy  Kappa
+  0.86      0.79 
+
+Tuning parameter 'size' was held constant at a value of 4
+Tuning parameter 'decay' was held constant at a
+ value of 0
+
+
+> names(modelo)
+ [1] "method"       "modelInfo"    "modelType"    "results"      "pred"         "bestTune"     "call"        
+ [8] "dots"         "metric"       "control"      "finalModel"   "preProcess"   "trainingData" "resample"    
+[15] "resampledCM"  "perfNames"    "maximize"     "yLimits"      "times"        "levels"       "terms"       
+[22] "coefnames"    "xlevels" 
+
+
+# Para ver los 10 accuracy
+
+> modelo$resample
+    Accuracy Kappa Resample
+1  0.8666667   0.8   Fold01
+2  0.9333333   0.9   Fold02
+3  0.4666667   0.2   Fold03
+4  0.9333333   0.9   Fold04
+5  0.9333333   0.9   Fold05
+6  1.0000000   1.0   Fold06
+7  1.0000000   1.0   Fold07
+8  1.0000000   1.0   Fold08
+9  0.4666667   0.2   Fold09
+10 1.0000000   1.0   Fold10
+
+
+> modelo$metric
+[1] "Accuracy"
+
+> modelo$bestTune
+  size decay
+1    4     0
+
+> modelo$finalModel
+a 4-4-3 network with 35 weights
+inputs: Sepal.Length Sepal.Width Petal.Length Petal.Width 
+output(s): .outcome 
+options were - softmax modelling 
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SI vemos que el Accuracy nos da bajo, entonces debemos CAMBIAR la cantidad de neuronas en la capa oculta
+
+# para hacer CrossValidation es lo mismo que hacer un train  pero utilizando un TrControl
+trControl=trainControl(method="cv", number=10)
+# para eso hacemos
+tuneGrid=expand.grid(size=c(4, 6, 10), decay=0)
+modelo=train(Species~., iris, trControl=trControl, tuneGrid=tuneGrid, method="nnet", maxit=5000)
+# esto hace varias Redes  y toma el que MEJOR accuracy da
+modelo
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+PROCESAMIENTO DE TEXTOS
+
+el objetivo es darle a la red un parrafo y que pueda predecir de que esta hablando
+
+. el texto debemos pasarlo a variables predictoras y a predecir
+. cada parrafo sera un registro
+
+
+hay dos formas de hacer procesamiento de textos
+. Text Mining          se debe hacer un super diccionario de palabras
+. Machine Learning     entiende por contexto de parrafos
+
+entonces para armar el TRAIN hay que
+. ARMAR el CONOCIMIENTO HUMANO
+. cada parrafo hay que ETIQUETARLO en el resultado
+. esto es costoso pero hay que hacerlo
+
+
+El archivo de TEXTO para train se llama CORPUS
+La base para el train, o sea, el DATASETS se llama BOLSA DE PALABRAS
+Cada palabra va a ser una variable independiente
+
+
+Ejemplo
+T1 Los pajaron son los animales ...
+T2 Las aves representan ...  y las aves....
+
+   Los  pajaron  son  los  animales  Las aves representan y las
+T1  1      1      1    1      1       0   0      0        0   0
+T2  0      0      0    0      0       1   2      1        1   1
+
+como las mayusculas y minusculas son diferentes,  conviene pasar minusculas
+ver el PDF  slide 8
+
+library(tm)
+base=readLines("texto.txt")
+texto=VCorpus(VectorSource(base))
+texto
+  informa la metadata,   cantidad de parrafos   documents: 6
+
+as.character(texto[[1]])     muestra el primer parrafo
+
+getTranformations()          muestra las funciones que se pueden aplicar
+                                removeNumbers(como son infinitos quizas convenga sacarlos),
+                                removeWords, stripWhitespace,
+                                removePunctuation(puntos, comas, comillas, etc..),
+                                stemDocument
+
+texto=tm_map(texto, content_transformer(tolower))   mayusculas a minusculas
+as.character(texto[[1]])
+
+texto=tm_map(texto, removePuntuaction)              sacamos la puntuacion
+texto=tm_map(texto, removeNumbers)                  saca numeros
+texto=tm_map(texto, stripWhitesapce)                saca espacios en blanco que quedaron en vano
+
+
+STOP WORDS  son palabras que llenan (relleno) y no dan informacion
+  R  ya las tiene para cada idioma
+  entonces se pueden sacar para tener menos palabras
+  LO RECOMENDABLES es armar nuestras propias STOP WORDS dado que nuestro contexto puede ser diferentes
+  por ejemplo   "y"  "no"  pueden darnos informacion
+
+stemDocument   saca la raiz, genero y numero de las palabras,   sirve para el ingles pero no para el castellano    en ingles le saca la s al verbo en 3 persona,  en castellano no nos sirve
+
+
+
+library(wordcloud)  #nube de palabras
+wordcloud(texto)    # da en forma grafica un resumen grafico de la nube de palabras de los parrafos
+         lista=c("que", "las")
+         texto=tm_map(texto, removeWords, lista)
+texto=tm_map(texto, removeWords, stopwords("spanish"))
+
+wordcloud(texto,, colors="rainbow(20)", rot.per=0.5)
+
+par(mfrow=c(2,2))  particiona la pantalla en 4
+
+ver WORDCLOUD 2
+
+
+CREAR la BOLSA de PALABRAS
+
+bolsa=DocumentTermMatrix(texto)     # esto crea la matrix, cada palabra es una variable
+bolsa=as.matrix(bolsa)              #
+fix(bolsa)
+
+km=kmeans(bolsa, 2)                 # separo en dos grupos
+km$size
+  5  1
+
+km$cluster
+  1  2  3  4  5  6
+  1  1  2  1  1  1
+
+el parrafo 3 es diferente
+
+
+dendo=hclust(dist(bolsa))
+plot(dendo)
+
+
+
+otra forma de hacerlo es que cada parrafo sea una columna y que cada palabra sea una fila
+   inversa=TermDocumentMatrix(texto)
+   inversa=as.Matrix(inversa)
+   fix(inversa)
+   dendo=hclust(dist(inversa))
+   plot(dendo)
+vemos la relacion de las palabras
+
+
+Armando a MANO una columna colocando AVE, AVE, AVE, PAJARO, PAJARO, PAJARO,  y hacemos una NNET   luego podemos colocar un parrafo y que nos diga de que habla.
+
+DEEP EMOJI  te calcula un emoji a partir de una frase
+
+
+
+
+
+
+

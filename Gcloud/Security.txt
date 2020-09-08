@@ -1,0 +1,58 @@
+IP External Static           :   35.202.224.183
+compute engine instance name :   liberdina-virtualbank
+instance Id                  :   1602848068728016024
+service account              :   698672529503-compute@developer.gserviceaccount.com
+connect via SSH 
+
+IAM
+  Member liberdinat@gmail.com, liberdina@gmail.com, marcelo.berra@gmail.com
+  Role   Owner, Compute OS Admin Login, Compute Admin
+
+
+Your account [m******.b****@gmail.com] doesn’t have a proper role like “the compute Instance Admin role” [1].
+If you would like to connect the instance with your account, I suggest to add “the compute Instance Admin role”
+to the account [m******.b****@gmail.com]. 
+
+Meanwhile, you can check ssh as well following recommendations below and actions in order to identify the
+root cause of this unwanted behavior.
+
+1. Make sure that the account has authenticated to gcloud as an IAM user with the compute instance admin role as
+I explained above.   For example, run commands below on the Cloud Shell[2].
+
+gcloud auth revoke --all 
+gcloud auth login
+gcloud compute ssh --zone "us-central1-f” "liberdina-virtualbank” --ssh-flag=-vvv
+
+2. Verify that persistent SSH Keys metadata for gcloud is set for either the project or instance.
+   Sometimes Metadata SSH Keys may expire. Consult this document [3] to learn how to handle SSH key metadata
+   on GCP. And try ssh again.  
+
+gcloud compute ssh --zone "us-central1-f” "liberdina-virtualbank” --ssh-flag=-vvv
+
+3. Force gcloud to recreate the user's SSH key pair then try gcloud compute ssh again.
+   Move the existing key pair aside using these commands:
+   mv ~/.ssh/google_compute_engine ~/.ssh/old-google_compute_engine
+   mv ~/.ssh/google_compute_engine.pub ~/.ssh/old-google_compute_engine.pub
+And try ssh again.   
+
+gcloud compute ssh --zone "us-central1-f” "liberdina-virtualbank” --ssh-flag=-vvv
+
+
+gcloud compute ssh liberdina-virtualbank --zone us-central1-f --ssh-flag=-vvv
+
+
+4. Try to connect using another username as is described in document [4].
+
+Let me know the results once done and I am looking forward to it.
+
+In case you have additional questions, please feel free to reply to this message and I will gladly assist you.
+
+Kind regards,
+
+Euesoon Kim
+Google Cloud Platform Support, Tokyo
+
+[1] https://cloud.google.com/compute/docs/access/iam#instance_admin_role
+[2] https://cloud.google.com/shell/docs/starting-cloud-shell
+[3] https://cloud.google.com/compute/docs/instances/adding-removing-ssh-keys#edit-ssh-metadata
+[4] https://cloud.google.com/compute/docs/troubleshooting/troubleshooting-ssh#try_a_new_user

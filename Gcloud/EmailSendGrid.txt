@@ -1,0 +1,60 @@
+Sending Email with SendGrid
+
+Use SendGrid with Postfix on a Compute Engine instance
+
+Centos
+. Become a superuser:
+     sudo su -
+. Set a safe unmask:
+     umask 077
+. Install the Postfix Mail Transport Agent:
+     yum install postfix cyrus-sasl-plain cyrus-sasl-md5 -y
+. Modify the Postfix configuration options
+     nano /etc/postfix/main.cf
+
+#default_transport = error
+#relay_transport = error
+relayhost = [smtp.sendgrid.net]:2525
+smtp_tls_security_level = encrypt
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+header_size_limit = 4096000
+smtp_sasl_security_options = noanonymous
+
+. Generate the SASL password map
+You can generate the SASL password map using the username and password for your SendGrid account:
+    echo [smtp.sendgrid.net]:2525 [YOUR_SMTP_LOGIN]:[YOUR_SMTP_PASSWORD] >> /etc/postfix/sasl_passwd
+    echo [smtp.sendgrid.net]:2525 apikey:[YOUR_API_KEY] >> /etc/postfix/sasl_passwd
+
+    echo [smtp.sendgrid.net]:2525 liberdinaT:newdestino2018 >> /etc/postfix/sasl_passwd
+User      liberdinaT
+Password  newdestino2018
+
+. Use the postmap utility to generate a .db file:
+    postmap /etc/postfix/sasl_passwd
+
+. Verify that you have a .db file:
+
+    ls -l /etc/postfix/sasl_passwd*
+     -rw------- 1 root root    ...  /etc/postfix/sasl_passwd
+     -rw------- 1 root root    ...  /etc/postfix/sasl_passwd.db
+
+. Remove the file containing your credentials, as it is no longer needed:
+    rm /etc/postfix/sasl_passwd
+
+. Set the permissions on your .db file and verify that the other file was removed:
+    chmod 600 /etc/postfix/sasl_passwd.db
+    ls -la /etc/postfix/sasl_passwd.db
+      -rw------- 1 root root    ...  /etc/postfix/sasl_passwd.db
+
+. Reload
+    postfix reload
+
+. Install the mailutils or mailx package:
+    yum install mailx -y
+
+. Send a test email:
+    echo '[MESSAGE]' | mail -s [SUBJECT] [EMAIL@EXAMPLE.COM]
+
+echo 'este es un mensaje' | mail -s 'Soy un Titulo' 'marcelo.berra@gmail.com'
+tail -n 5 /var/log/maillog

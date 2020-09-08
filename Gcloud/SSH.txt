@@ -1,0 +1,10 @@
+ssh-keygen -t rsa
+   [enter]
+   newdestino2019
+
+cat ~/.ssh/id_rsa.pub     paste it in the SSH key field in Google Cloud and hit Create
+
+
+Now you can use the External IP of the virtual machine you just created
+
+ssh 35.243.241.239

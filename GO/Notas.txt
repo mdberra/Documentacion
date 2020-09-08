@@ -1,0 +1,72 @@
+HTTP request multiplexer
+	https://github.com/gorilla/mux
+	go get -u github.com/gorilla/mux
+
+CORS
+go get github.com/rs/cors
+
+
+JSON Web Tokens
+	https://jwt.io
+	https://tools.ietf.org/html/rfc7519
+
+	dgrijalva/jwt-go
+	https://github.com/dgrijalva/jwt-go
+	go get -u github.com/dgrijalva/jwt-go
+
+CRYPTO
+	go get -u golang.org/x/crypto
+
+Load Environment variables dynamically
+	go get -u github.com/subosito/gotenv
+
+QRCode
+	go get -u github.com/skip2/go-qrcode/...
+
+SQL
+---
+Pure Go driver Mysql
+	https://github.com/go-sql-driver/mysql
+	go get -u github.com/go-sql-driver/mysql
+
+Pure Go driver Postgres
+	https://github.com/lib/pq
+		go get github.com/lib/pq
+
+TOOLS
+-----
+Degub
+	https://github.com/go-delve/delve
+	go get -u github.com/go-delve/delve
+
+Spew
+	https://github.com/davecgh/go-spew
+	go get -u github.com/davecgh/go-spew/spew
+
+
+Instalar Version
+----------------
+$ sudo tar -C /usr/lib -xzvf goX.X.X.linux-xxx.tar.gz
+editaremos el archivo /home/marce/.profile
+
+export PATH=$PATH:/usr/lib/go/bin
+export GOPATH=$HOME/GoogleDrive/Code/Go
+export GOROOT=/usr/lib/go
+export GOTOOLDIR=/usr/lib/go/pkg/tool/linux_amd64
+
+sudo apt-get install build-essential
+
+
+Espacios de trabajo
+-------------------
+1. `src` contiene archivos de código fuente organizados en paquetes (un paquete por directorio).
+2. `pkg` contiene objetos de paquetes, y ...
+3. `bin` contiene comandos ejecutables. 
+
+GOPATH: especifica la locación de su espacio de trabajo
+
+
+
+
+
+

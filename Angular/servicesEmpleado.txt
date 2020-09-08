@@ -1,0 +1,54 @@
+empleado
+ . empleado.component.html
+ . empleado.component.ts
+ . empleado.ts
+
+empleado.model.ts
+-----------------
+export class Empleado {
+	constructor(
+		public nombre:string,
+		public edad:number,
+		public cargo:string,
+		public contratado:boolean
+	) {
+
+	}
+}
+
+export class EmpleadoComponent {
+	public e:Empleado;
+	public trabajores:Array<Empleado>;
+
+	constructor() {
+		this.e = new Empleado('CATA', 12, 'Albanil', true);
+		this.trabajores = [
+			new Empleado('Pepe', 23, 'Electricista', true),
+			new Empleado('Pedro', 45, 'Cocinero', false),
+			new Empleado('Ana', 67, 'Ama de casa', true)
+		];
+	}
+
+empleado.service.ts
+-------------------
+import { Injectable } from '@angular/core';
+@Injectable()
+export class RopaService {
+	private nombrePrenda = 'Pantalones';
+	private collecionRopa = ['Remera', 'Short', 'Buzo'];
+
+	getPrenda() {
+		return this.nombrePrenda;
+	}
+	addRopa(prenda:string):Array<string> {
+		this.collecionRopa.push(prenda);
+		return this.getRopa();
+	}
+	getRopa():Array<string> {
+		return this.collecionRopa;
+	}
+	delRopa(index:number):Array<string> {
+		this.collecionRopa.splice(index, 1);
+		return this.getRopa();
+	}
+}

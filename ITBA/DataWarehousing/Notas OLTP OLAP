@@ -1,0 +1,502 @@
+en una bd analitica me importan los datos y las consultas
+en una bd relacional me importan como se obtienen los datos
+
+OLTP  online transactional proocessing
+OLAP  online analitycal processing
+
+--------------------------------------------------------------------------------------------------------
+Fases para disenar una DB OLTP
+------------------------------
+1. Especificaciones de Requerimientos
+2. Disenio conceptual                     RCLF
+3. Disenio Logico
+4. Disenio Fisico
+
+El disenio conceptual de BD es definir un modelo que provee una vision del mundo que nos interesa modelar
+en termino de entidades y relaciones entre ellas.
+Los modelos son notaciones que nos permiten abstraernos.
+Las bds nos permiten definir modelos de abstraccion
+En el disenio logico utilizo una bd relacional
+en el modelo conceptual.
+
+Independencia Logica:  Puedo cambiar el modelo logico sin cambiar el modelo conceptual.  Mientras no cambia la realidad no cambia el modelo conceptual.
+
+El disenio fisico es una customizacion del modelo logico.
+
+--------------------------------------------------------------------------------------------------------
+OLTP  son bd que dan soporte a trasacciones
+Conceptual model:  Modelo Entidad/Relacion  (Entity/Relationship Types)  es una notacion que representa lo que queremos
+
+Entity type             : conj de entidades que representa un set de objetos del mundo real
+Entity                  : cada elemento del conjunto
+Relationship type       : relaciones entre los objetos / las relaciones pueden tener atributos
+Relationship            : cada elemento del conjunto
+Role
+Cardinalities in a role : definen como son las relaciones
+
+La DB relacionales son ESTRUCTURADAS, porque cuando se define el esquema (Tabla) luego se crean las instancias(registros)
+
+La DB no relacional, No son Estructuradas, cuando se crean las instancias, se van generando la DB
+
+--------------------------------------------------------------------------------------------------------
+Modelo de Datos
+. compuesto por 3 elementos
+  . estructura de datos
+    . conj de entidades
+    . conj de relaciones
+  . restricciones (como se relacionan los datos) (1,n) (1,1) (0,n)
+  . lenguaje de consulta  (en este caso no es el SQL)
+
+--------------------------------------------------------------------------------------------------------
+Entity-Relationship Model: Generalization
+
+Mecanismo de abstraccion
+. herencia (Generalization)  heredan la clave del padre y los atributos
+. parte de
+
+un empleado puede ser permanente o transitorio  entonces ponemos: Total Disjoint
+. la suma de los permanentes + los transitorios = a todos los empleados.
+. la interseccion = vacio
+
+Mundo Real --> modelo conceptual --> modelo logico
+
+
+Empleados ---- Departamentos:  la relacion es N..N   si queremos fecha inicio/fin --> pertenece a la relacion
+
+--------------------------------------------------------------------------------------------------------
+Logical DB Design: Modelo Relacional
+
+traducir el modelo conceptual a un modelo logico.
+. se basa en una estructura de datos(tabla) que tiene atributos o columnas
+. los atributos deben ser atomicos y monovalued
+. elemento de la tabla: fila o tupla
+. Data type: integer, float, string ...
+. Declaratives: Integrity constraints
+. Not null attribute
+. Key: identifica univocamente una fila en una tabla
+  . Simple vs Composite
+  . Primary vs Alternate
+
+.Integridad referencial: se implementa con Foreign Key
+
+Create Table Permanentes
+ (ID  Primary Key, Foreign Key References EmpleadoID)
+
+Foreign Key  viene gratis,  las relaciones de Herencia hay que implementarla y programarla: No viene gratis
+Si agrego un empleado como permanente hay que validar que no sea Temporal dado que pusimos el Total Disjoint
+
+
+Modelo Conceptual se transforma en el modelo Relacional (Logico)
+
+--------------------------------------------------------------------------------------------------------
+Normalization
+
+todas las bd relacionales OLTP se disenan cumpliendo ciertos principios. 
+Se evitan: reundancias e inconsistencias
+
+Se podria hacer una sola tabla con todos los datos: Relacion Universal
+Esquema   :  es la estructura
+Instancia :  Son los registros que se gestionan con el CRUD
+
+Dependencia Funcional:  cuando un atributo le corresponde siempre el mismo C1 golosina, jamas podria decir C1 mariscos
+Cada Atributo: es un cambpo atomico, o sea, siempre tiene un unico valor. Atributo Color: RED  (y no RED, GREEN, ...)
+todos los atributos son atomicos
+
+OLTP se normaliza para garantizar, disminuir la redundancia, disminuir la consistencia,  pero para consultar es mas trabajoso, o sea, las consultas son menos eficientes.
+OLTP da soporte a procesos  y  no a consultas analiticas
+
+Generalmente se llega a 3 Normal Formal
+
+SQL
+. DDL (Data Definition Language)  Create Table, Drop Table, Alter Table
+. DML (Data Manipulation Language) Insert, Update, Select, Delete
+
+JOIN
+----
+select *
+from Supplier S JOIN Products P  ON S.SupId = P.SupplierId
+Where ...
+
+Para consultas ANALITICAS se usa
+. Group By
+. Having
+. Order By
+
+
+
+01137544844
+
+exponsor  EscuelaP
+25M44
+
+
+--------------------------------------------------------------------------------------------------------
+DATA WAREHOUSING Y OLAP
+
+Concepto de Bussiness Inteligence es transformar datos crudos en informacion valiosa para la toma de decisiones.
+Los datos crudos estan en las fuentes de datos, son los sistemas operacionales, y otros.  Son los datos VERDADEROS
+Luego de los ETL,  los datos se almacenan en el DATAWAREHOUSES y se explotan con herramientas.
+
+Con OLAP (Analitics Paradigm) hacia el Data Analytics.
+Data Mining, usado desde 1990, el objetivo es extraer conocimiento oculto en el DW
+
+Existen muchas tecnicas de BI para desarrollar y asistir a la toma de deciciones.
+. Reporting techniques: dashboards, alerts
+. Key Performance Indicators (KPIs)
+. Analytics OLAP
+
+
+BI LifeCycle
+
+Datos -> Conocimiento -> Accion -> Resultado     DCAR
+     (BI)          Tecnicas  Implementacion
+                    de MKT     de acciones
+
+
+DW General Scheme
+
+Fuentes
+de Datos   ->  ETL   ->  DW   -> OLAP Analytics, Reporting, Data Mining
+            (Staging)
+
+Vamos a concentrarnos en Modelar el DW.  El objetivo es disenarla para que la explotacion sea eficiente.
+
+Kylin (OLAP Analysis en un tiempo breve)
+
+Un DW es una coleccion de informacion orientada a un determinado tema,
+ integrada de distintas fuentes,
+ no volatil porque siempre inserta datos en el DW
+ varia en el tiempo, tiene historia
+ la informacion no esta almacenada al mismo nivel de detalle que en el OLTP
+
+Para definir una DB OLAP tmb se utilizan el mismo proceso de 4 fases que en OLTP
+1. Especificacion de Req : Que consultas se hacen? Que te gustaria ver? Analizar?
+2. Disenio Conceptual    : Modelar el mundo real en terminos de Entidades y Relaciones, pero no es necesario normalizar porque el objetivo es ser mas eficiente para realizar consultas. 
+   Entonces se utiliza un modelo Multidimensional: Mira el mundo en termino de ECHOS y DIMENSIONES para ser ANALIZADO.
+   Las operaciones de GROUPY BY y DISTINCT son las operaciones mas CARAS en el momento de ejecucion
+   Entonces necesitamos otra forma de Modelar.  La unica forma de hacer eficiente las consulta es hacer VISTAS MATERIALIZADAS (Summary Tables)
+   Cuando se tiene una tabla con varias dimensiones y metricas,  necesitarias 2 a la dimensiones tablas para obtener todas las combinaciones.
+   Como es imposible, se decide cuales son las vistas materializadas mas utilizadas para implementarlas.
+   Las Vistas Materializadas siempre se vuelvan a computar cuando se hace el ETL
+   En SQL existen vistas  CREATE VIEW, pero no son materializadas. Entonces debo hacer  CREATE MATERIALIZE VIEW  estas si son eficientes.
+   Ver que las Vistas Materializadas se ejecuten automaticamente cuando cambian las tablas origen
+
+MODELADO MULTIDIMENSIONAL (Conceptual)
+SLIDE 32-38
+
+ven a los datos como un conjunto de hechos asociados a dimensiones.
+Hay dimensiones y medidas.  Las jerarquias de agregacion, por ejemplo las ventas de Enero contribuyen al primer trimestre. O sea, como se agrega la info en otras segun una jerarquia.
+Mes, trimestre, anio    Ciudad, Estado, Pais, etc...
+Se define el nivel mas fino para cada dimension.  Por ejemplo se define el MES
+
+Jerarquias
+Producto    : All, Category, Product
+Time        : All, Year, Semester, Quarter, Month, Day
+Customer    : All, Continent, Country, State, City, Customer
+
+Las jerarquias de la dimension, cada nivel tienen un conjunto de instancias.  Por ejemplo  que State suman en que Country
+O sea, un miembro de un nivel de una dimension, la union de todos ellos son la instancia de ese nivel.
+Estas jerarquias se colocan en la Metadata.  Las jerarquias deben ser total disjoint
+
+Funciones de Agregacion, SUM, PROM, MIN, MAX, COUNT, DISTINCT,  algunas son incrementales otras no.  Count y distintic count no son incrementales si se los calcula por particiones
+Hay funciones Holisticas y funciones Distributivas.  La suma es Distributiva
+Distributiva
+Cli, sum
+cli, prod, sum
+cli, date, prod, sum
+
+La mediana es Holistica
+
+
+Funciones Additivas, semiaditivas, NoAditivas: 
+Prod, Mes, Cant  --> esta cantidad representa el INVENTARIO que hay en cada mes de cada producto,  Entonces NO es ADITIVA
+Time --> All, Year, Semester, Quarter, Month, Day
+Producto --> All, Category, Product
+
+La Instancia es el conjunto formado por todos los miembros. 
+
+Por Ej,  todas las ventas de un mismo dia, tiene todos los productos que se vendieron ese dia. 
+Se pueden agregar JERARQUIAS de AGREGACION para sumar(agregar) sobre el MIEMBRO superior
+
+
+
+3. Disenio Logico
+Hay dos esquemas,  modelo ETRELLA o SNOWFLAKE    (Start schemas, SnowFlake schemas)
+Para almacenar los cubos se puede almacenar:
+. MOLAP (multidemsional)  los vendors no muestran el disenio.  Se usa hasta 10 dimensiones
+. ROLAP (Relation)         es el tipico
+. HOLAP (Hibrid)
+
+
+4. Disenio Fisico
+
+
+
+
+
+OLAP OPERATIONS
+Slide 39-
+
+Existen 2 lenguajes,  
+. Declarativos  SQL (decimos que queremos,  no decimos que operacion hay que hacer)
+. Procedurales, debemos decir cuales son las operaciones.  OLAP OPERATIONS (lenguaje cerrado, recibe un cubo y devuelve otro cubo)
+
+. Roll-up 
+Agregar datos de un cubo en una dimension.  No cambia la cantidad de dimensiones
+
+RollUp(Cubo de datos, Nivel, Dimension) --> devuelve un cubo de las misma dimensiones
+    Lyon + Paris --> Francia   
+    Koln+Berlin --> Alemania
+
+. Drill-down
+es la inversa del Roll-up
+(Cubo, dimension, Nivel, Agregacion) --> Cubo
+se puede ir para bajo hasta el minimo nivel desde donde se construyo
+
+Hacer un Drill-down hasta un nivel es lo mismo que hacer el Roll-up desde el cubo base hasta ese nivel
+
+. Dice  Slide 42
+(Cubo, condicion Boolean) --> Cubo(con las celdas que satisfacen la condicion)
+
+
+. Slice
+(cubo, Dimension, FuncionAgregacion) --> cubo(sin la dimension mencionada)
+
+.Slice&Dice --> se queda con un slice
+
+
+
+
+
+Conceptual Data Warehouse Design
+Modelo Conceptual
+
+
+Analizar--> Dimensiones, jerarquias, Hechos, metricas
+
+Notacion
+. Dimension
+. Hierarchy: conj de nivel relacionados entre si
+. Level: conj de entidades
+. Member: 
+. Child/parent
+. Leaf/root
+. Cardinality
+. Criterion
+. Key attribute
+. Descriptive attributes
+
+
+
+
+Balanced hierarchies (es la que mas nos conviene)
+. relacion 1 a muchos
+. siempre tenemos el mismo level
+. misma altura del arbol en todos los casos
+por cualquier dimension se puede sumarizar
+
+Unbalanced Hierarchies
+. todas las relaciones son de muchos a 1 pero algunas son opcionales  1 a muchos o 0
+. no hay problema para sumarizar porque en el peor de los casos no hay nada para sumar
+. diferentes altura del arbol
+
+Recursive Hierarchies
+. una persona tiene muchos subordinados y hay uno que no reporta a nadie
+. diferentes altura del arbol
+
+Generalized Hierarchies
+. arboles disjuntos. o sea, son arboles diferentes
+. por ejemplo clientes corporativos e individuales
+. muchos caminos exclusivos que comparten el nivel principal
+
+Noncovering Hierarchies
+. jearquias geograficas
+. algunos arboles, algunos niveles no estan
+. todos agregan sobre el nivel inmediato superior
+
+
+Nonstrict Hierarchies
+. relaciones de muchos a muchos
+. muchos a 1 son estrictas
+. muchos a muchos son NoEstrictas
+. entonces tenemos una red (un grafo)
+. Si un empleado vendio 100 unidades, podemos no saber en que State las hizo.
+. Si la asociamos a algunas ciudades, podemos tener un problema de doble conteo
+. una jerarquia NoEstricta es NoSumarizable
+. el objetivo aca es identificar el problema
+. entonces hay que resolverlo en el nivel logico
+
+
+Many-to-Many Dimension
+. slide 34
+. relacion muchos a muchos entre un echo y una dimension
+
+
+
+Ejercicio
+Objetivo General
+1. Aumentar la cantidad de reproducciones en un 10% en un anio la cantidad de canciones no escuchadas
+   . Aumentar la cantidad de reproducciones de temas no escuchados
+      . Temas mas escuchados
+         . Matching Por A, proponer los temas menos escuchados
+
+      (A)rango etario, genero(MH), tipoDispositivo, rango horario, generoMusical, zona geografica,
+
+   . Obtener para cada rangoEtario y zonaGeografica cual es el GeneroMusical y tema escuchado >10% de la media por semana en los ultimos 52 semanas
+   . Obtener para cada rangoEtario y zonaGeografica "tema clasico" como aquellos que se escuchan >-20% de la media en cada semana
+
+   . Aumentar la cantidad de reproducciones de interpretes no escuchados
+      . cantidad de interpretes que superan el promedio anual por 
+
+
+2. Aumentar la cantidad de subscripciones premium en un 10%
+   Analizar por tipoCliente, cantidad de reproducciones, A
+
+DIMENSIONES
+Metrica Duracion:  Dia,hora,Minuto, duracion
+Usuario, escucho cancion, en un momento, y la escucho tanto tiempo
+Franja horaria
+Rango Etario
+Genero cliente
+Fecha de nacimiento (rango etario)
+Cliente, Cuentas
+Fecha Inscripcion, Antiguedad (Rango)
+De donde es el usuario, geografia (ciudad, pais, etc...)
+Donde la escucho? Geografia, en que lugar la escucho
+Idioma del cliente
+Idioma de la cancion
+En que dispositivo la escucho, es una dimension de la cancion
+Interprete es una dimension de la reproduccion y no de la cancion dado que la cancion la puede cantar diferentes interpretes
+
+
+
+Logical Modeling of Data Warehouse
+slide 3
+
+Disenio Relacional
+   Esquema Estrella
+   . en el medio la fact (hecho) y alrededor las dimensiones.
+   . Las tablas se encuentran desnormalizadas,  en 1 forma normal.
+   . La tabla del FACT tiene todas las claves de las dimensiones, se encuentra normalizada y se agrega un ID general.
+   . Las jerarquias no estan,  no existen.
+
+   Esquema Copo de Nieve Snowflake
+   . similiar al anterior con tablas normalizadas
+   . las dimesiones se encuentra normalizadas 
+
+      select StateName, sum(Amount)
+      from Sales S join Store T on s.sk = T.tk
+                   join City C  on s.sk = C.ck
+                   join State A on s.sk = A.ak
+      group by StateName
+
+   Esquema Constellation
+   . cuando tengo mas de una Fact Table
+   . es un Snowflake con varias FactTable que comparten dimesiones
+
+
+Ahora hay que ver como implementar las jerarquias
+SQL recursive
+
+Select with recursive
+
+Cuando hay un relacion muchos a muchos se puede colocar una BRIDGE table (FactTable) donde tiene las claves de las tablas involucradas
+
+Cuando tenemos una jerarquia DESBALANCEADA aparecen valores NULL.  Estos en las tablas al momento de hacer SELECTs JOIN
+traen problemas. Entonces se utilizan PLACE HOLDERS.  Se reemplazan los NULLs por strings predefinidos por ejemplo (PlaceHolders)
+
+
+
+Cuando un cliente es corporativo o individuo, en la tabla cliente se colocan las dos foreagin key, una tiene el valor y la otra null. (slide 21)
+ALTER TABLE Customer .... ADD CONSTRAINT CustomerPersons FK
+CHECK ((CustomerType != 'Person) OR *ProfessionKey IS NOT NULL AND SectorKey IS NULL))
+
+
+
+Slowly Changing Dimension SLIDE 47
+------------------------- 
+Las dimensiones pueden cambiar en el tiempo,  lentamente pero pueden cambiar.
+O sea,  ahora los datos son analizados en un contexto que en el momento que sucedio habia otras dimensiones.
+Estos cambios pueden haber sido por correcciones  o  son cambios por condiciones de contexto.
+
+La realidad es que hay que mantener la HISTORIA de los cambios.  Ej Tabla PRODUCT, cuanto cambian sus atributos, hay que guardar la historia.
+
+7 tipos:
+. Correccion
+. Agregar TIME como atributo en las tablas estrellas.
+.
+
+
+Ver SQL/OLAP Operations Slide 42
+. Rollup
+. Grouping Sets
+. Cube
+. Window Partitioning: se usa para rankings
+         SELECT ProductKey, CustomerKey, SalesAmount, 
+                MAX(SalesAmount) OVER (PARTITION BY ProductKey) AS MaxAmount
+         FROM Sales
+    divido la tabla en grupo de Productos, y en cada particion calculo el Maximo y tengo una nueva columna del maximo por cada producto. Esto sirve para luego poder comparar
+    o sea, maximo de Venta por particion de cada producto
+
+
+. Window Ordering    : permite particionar y rankear al mismo tiempo
+         SELECT ProductKey, CustomerKey, SalesAmount,
+                  ROW NUMBER() OVER (PARTITION BY CustomerKey ORDER BY SalesAmount DESC) AS RowNo
+         FROM Sales
+   particiono por cliente, ordeno por SalesAmount y se rankea los productos por las ventas
+
+
+. Window Framing     : permite calcular el promedio movil
+         SELECT ProductKey, Year, Month, SalesAmount,
+                  AVG(SalesAmount) OVER (PARTITION BY ProductKey ORDER BY Year, Month ROWS 2 PRECEDING) AS MovAvg
+         FROM Sales
+  promedio sobre la particion por producto ordenado por anio/mes, calculando el promedio de la fila actual y las 2 anteriores
+
+         ROWS 2 PRECEDING  esto hace que suma las ultimas 3
+
+
+         SELECT ProductKey, Year, Month, SalesAmount,
+                  AVG(SalesAmount) OVER (PARTITION BY ProductKey, Year ORDER BY Month ROWS UNBOUNDED PRECEDING) AS YTD
+         FROM Sales
+  suma acumulada dentro de la particion Producto/Anio
+
+         ROWS UNBOUNDED PRECEDING  esto hace que suma todas las tuplas que se encuentran dentro de la particion
+
+
+
+
+obtener las medias de los items de las encuestas de los aeropuertos != Argentina para compararlas
+
+
+
+BASE DE DATOS DE GRAFOS
+-----------------------
+
+Las 3 Vs      VOLUMEN      VARIEDAD     VELOCIDAD
+
+Dentro de las db No Sql,  hay una relacion entre tamanio y complejidad
+
+. complejidad baja y tamanio grande,  KEY VALUE STORE  (no relacional)
+. complejidad aumenta, tamanio disminuye,  MONGO DB  DB DOCUMENTAL
+. complejidad alta y tamanio menor, REDES,  GRAFOS,  complejo computacionalmente
+
+Un grafo es un conjunto de nodos y una relacion binaria entre ellos
+Cada relacion es un arco dirigido
+
+Property Graphs:  son grafos donde los nodos y los arcos tienen atributos en formato JSON
+
+Base de datos de grafos tiene un modelo de Property Graphs
+
+. a nivel de repositorio se almacenan grafos
+
+Teorema CAP,  nunca se puede estar en las 3
+    Consistencia, Disponibilidad, Particionar
+  POSTGRE y NE4J   tiene C y A  no tiene P
+
+
+
+NEO4J
+. tiene un lenguaje de consulta CYPHER
+. /plugins   se colocan los jar para ampliar
+. bajando el plugin de postgre se puede conectar con la db
+   

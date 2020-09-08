@@ -1,0 +1,93 @@
+Project:       silken-vial-220421	
+
+Name:          liberdina-i1
+External IP:   35.243.241.239
+
+Firewalls
+. Allow HTTP traffic
+. Allow HTTPS traffic
+
+Network tags
+http-server, https-server, server5000
+estos no los agregue:default-allow-http, default-allow-ssh, 
+
+SSH Keys
+. colocar la public   liberdinat
+
+Firewalls Rules
+Name                 Target tags    Protocols and ports     Applicable to instances
+default-allow-http   http-server    tcp:80                  liberdina-virtualbank
+default-allow-https  https-server   tcp:443                 liberdina-virtualbank
+server5000           server5000     tcp:5000                liberdina-virtualbank
+
+
+cd /home/liberdinat
+copiar
+. ServerServina
+. Lanzador.sh
+. liberdinat.conf
+
+chmod 777 ServerServina
+chmod 777 Lanzador.sh
+chmod 777 liberdinat.conf
+
+./ServerServina
+
+
+NGINX
+-----
+sudo apt-get install nginx
+sudo nginx -v
+curl -I 127.0.0.1
+
+cd /var/www/html   se encuentra la index que se muestra
+
+sudo cp /home/liberdinat/liberdinat.conf /etc/nginx/conf.d/liberdinat.conf
+
+copiar con WinSCP  los sites en 
+  cd /var/www/html             cd /usr/share/nginx/html
+  sudo chmod -R 777 html
+
+//Reload
+sudo nginx -s reload
+
+curl pepeya.com.ar
+
+        en /etc/nginx   se encuentra nginx.conf
+        dentro de el esta la configuracion global
+          worker_processes  1;   cambiarlo a    worker_processes  auto;
+        y tmb dice
+          access_log  /var/log/nginx/access.log  main;
+          include /etc/nginx/conf.d/*.conf;
+        este ultimo dice que todos los files .conf se incluyen
+        en /etc/nginx/conf.d/  solo esta el default.conf
+
+// Logs
+cd /var/log/nginx
+
+// Config
+cd /etc/nginx/
+
+STORAGE
+-------
+para poder conectarse al Storage(Bucket) desde la compute engine se debe tener un .json
+  mkdir Keys
+    y copiar silken-vial-220421-9ea1970c49a9.json
+  mkdir Temp
+que se usa desde el ServerServina
+
+
+
+LANZADOR.SH
+crontab -e
+@reboot sh \home\liberdinat\Lanzador.sh &
+
+
+. Reiniciamos el sistema
+  sudo reboot
+  Luego de reiniciar, ya se ejecutara el script al iniciar el Sistema.
+
+
+Version de SO
+-------------
+cat /etc/*-release

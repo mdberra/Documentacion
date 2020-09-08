@@ -1,0 +1,453 @@
+Docker
+
+Host:  es la maq donde se esta ejecutando
+. CLI
+. Rest API
+. Daemon server
+
+en el Host hay
+. Imagenes
+. contenedores
+. Volumenes
+. Redes
+
+
+IMAGENES
+. Paquete que tiene todo lo necesario para ejecutar una app
+. tiene layers
+  . Layers de SOLO LECTURA RO:
+    . Layer 1 FROM : SO,  utiliza un mini SO
+    . Layer 2 RUN  : Apache, Nginx, etc...
+    . Layer 3 CMD  : linea que se ejecuta para levantar el servicio, comando que inicie el servicio de la capa 2
+
+         Dockerfile
+            FROM centos:7
+            RUN yum -y install httpd
+            CMD ["apachectl", "-DFOREGROUND"]
+
+
+CONTENEDORES  Layer 4   es de ESCRITURA y TEMPORAL
+. es un layer adicional que trae una ejecucion de las layers de la Imagen (Dockerfile)
+. no se puede guardar datos porque es temporal
+. tiene
+  . las layers de las Imagenes
+  . Volumenes para persistir datos
+  . Redes para poder comunicar contenedores entre si
+
+
+//CMD ["nginx", "-g", "daemon off;"]
+
+
+Images
+. pull                                 docker pull name        docker pull mysql:8.0.11
+
+. ver                                  docker images           docker images | grep name
+                                                               docker images -f dangling=true     -f es de filter
+                                                               docker images -q     muestra los IMAGE_ID
+
+. build                                docker build --tag NameImagenResult:Tag .  
+                                             el punto significa que toma el file Dockerfile que se encuentra en el directorio
+
+
+. history                              docker history -H NameImagenResult:Tag
+                                             permite ver las capas que se crearon
+
+. eliminar                             docker rmi   idImage or name:tag 
+
+. eliminar Dangling Images             docker images -f dangling=true -q | xargs docker rmi     xargs para conectar los -q al rmi
+
+
+
+   FROM  buscar docker centos image
+
+               FROM debian
+               RUN apt update && apt -y upgrade
+               RUN apt -y install nginx -y
+                 el -y    significa el YES para todo
+               CMD nginxctl -DFOREGROUND
+
+
+Contenedores
+. a partir de una imagen podemos crear varios contenedores,  cada uno debe llamarse diferente
+. ver                                  docker ps -a
+                                       docker run --help | less
+. eliminar                             docker rm -fv name       // -fv es para forzar
+. crear a partir de una imagen         docker run -d --name NameContenedor nameImage
+                                       docker run -d --name NameContenedor -p 80:80 nameImage
+                                             docker run -d --name apache -p 80:80 centosapache
+. run en el fondo
+                     docker run -d imageName
+
+. PORTs  debemos mapear el puerto de mi maquina al puerto del contenedor
+                     docker run -d -p 9090:8080 imagenName
+
+. rename             docker rename  nameOrigen nameDestino
+
+. start              docker start    Name/ID
+. stop               docker stop     Name/ID
+. restart            docker restart  Name/ID
+
+. ingresar a un contenedor que se esta ejecutando
+                     docker exec -ti Name/ID bash       //  -ti es terminal interactive
+
+                        whoami
+                        hostname
+                        exit   salimos de la terminal interactive 
+
+         para entrar como user ROOT
+                     docker exec -u root -ti Name/ID bash
+
+
+. mostrar los nombres de los contenedores             docker ps -q
+
+. para borrar todos los contenedores, pasamos por parametros todos los nombres
+                                                      docker ps -q | xargs docker rm -f
+
+. pasar una variable de entorno
+                     docker run -dti -e "prueba1=4321" --name nameContend  imageName
+
+
+Dockerfile
+. archivo para definir la configuracion de la imagen
+. FROM  RUN  COPY/ADD  ENV  WORKDIR  EXPOSE  LABEL  USER  VOLUME  CMD  .dockerignore
+. cambiar el nombre,  entonces debemos hacer el build de estar manera
+
+         docker build -t NameImagenResult   -f dockerFilename .
+
+. para ver el FileSystem       df -h  
+
+
+MultiStageBuild
+---------------
+         FROM centos as TEST
+         RUN fallocate -l 10M /opt/file1
+         RUN fallocate -l 20M /opt/file2
+         RUN fallocate -l 30M /opt/file3
+            // esto crea una imagen con 3 archivos vacios
+
+         FROM alpine //otro SO
+         COPY --from= TEST /opt/file2  /opt/myfile
+            // esto hace que desde el contexto TEMPORAL llamado TEST  se copie un recurso
+            // el build de todo esto SOLO deja el Ultimo FROM
+
+
+NINGX       /var/www/html
+
+
+COPY  copia archivos desde la maquina nuestra     al ambiente de docker que estamos armando
+
+ADD   permite agregar URL, descarga el contenido de la URL y la coloca    al ambiente de docker que estamos armando
+
+ENV   permite agregar Variables de Entorno
+      ENV contenido prueba
+      RUN echo "$contenido" > /var/www/html/prueba.html
+
+WORKDIR /var/www/html     permite setearse en un DIR definido
+        COPY origen  .
+
+EXPOSE  permite exponer puertos      EXPOSE 8080
+
+
+LABEL    es una etiqueta  LABEL version=1.0    LABEL description=:"this in an ningx image"   es metadata de la imagen
+
+USER     define que usuario esta ejecutando la tarea
+         
+         RUN echo "$(whoami)" > /var/www/html/user1.html
+         RUN useradd ricardo    // agrega un usuario llamado ricardo
+         USER ricardo
+         RUN echo "$(whoami)" > /tmp/user2.html
+         USER root
+         RUN cp /tmp/user2.html /var/www/html/user2.html
+
+cuando se ejecuta,  los archivos se ven desde el browser haciendo
+         localhost/user1.html  y   localhost/user2.html
+
+
+VOLUME   sirve para hacer que la DATA que se genera quede persistida en nuestra maquina y no se pierda
+
+
+CMD      mantiene vivo al contenedor.  Debe ser un proceso en primer plano o un SCRIPT
+         SCRIPT
+            creamos un run.sh
+                        #!/bin/bash
+                        echo "iniciando container...."
+                        apachectl -DFOREGROUND
+                        
+         COPY run.sh  /run.sh   copia el archivo desde nuestra maquina a la imagen que estamos generando
+         CMD sh /run.sh         aca se ejecuta
+
+   para ver lo que esta ejecutando hacemos
+         docker ps
+         docker logs -f  NameContainer
+
+
+DockerIgnore
+   sirve para informar que archivos NO queremos incluir en la imagen
+   en   .dockerignore  colocamos los nombres de los archivos que se deben ignorar
+
+
+
+Buenas Practicas
+----------------
+. El servicio debe ser EFIMERO, se debe poder destruir con facilidad
+. Debe haber un servicio por contenedor, o sea, un solo servicio instalado por imagen.   Si hay nginx  no puede haber mysql en la misma imagen
+. usar el .dockerignore para no subir archivos que no se utilicen
+. reducir el nro de capas que tiene la imagen.  Imagenes pequenas
+. separar argumentos con \ para enterderlo mejor
+. No instalar paquetes innecesarios
+. usar varios argumentos en una sola capa   en vez de  varias capas con un argumento cada una
+. utilizar Labels para que haya metadata en las imagenes
+
+
+
+MONGO
+         docker pull mongo
+
+         docker run -d --name miMongo -p 27017:27017 mongo
+
+         docker stats miMongo    // para ver estadisticas
+
+         docker logs -f miMongo  // para ver logs
+
+NGINX    docker run -d -p 8888:80 --name nginx nginx
+
+APACHE   docker run -d -p 9999:80 --name apache httpd
+
+TOMCAT   docker run -d -p 7777:8080 --name tomcat tomcat
+
+POSTGRES
+         docker pull postgres
+         docker run -d --name postgres -e "POSTGRES_PASSWORD=1234" -e "POSTGRES_USER=docker" -e "POSTGRES_DB=docker-db" -p 5555:5432 postgres
+         docker exec -ti postgres bash
+               psql -d docker-db -U docker
+               \q
+               exit
+
+JENKINS
+         docker pull jenkins
+         docker run -d -p 7070:8080 --name jenkins jenkins
+         docker exec -ti jenkins bash
+            cat /var/jenkins_home/secrets/initialAdminPassword
+
+RECURSOS
+
+         docker run -d --name mongo mongo
+         docker stat mongo  //muestra los recursos del contenedor
+         free -h  muestra como estan los recursos
+
+         docker run -d -m "500mb" --name mongo2 mongo   // limita la RAM a 500MB
+         docker run -d -m "5gb" --name mongo2 mongo   // limita la RAM a 5GB
+
+         grep "model name" /proc/cpuinfo    // para ver los CPU que tiene la maq
+
+         docker run --help | grep cpu  //para ver todos los parametros que podemos limitar
+
+         docker run -d -m "1gb" --cpuset-cpus 0-1 --name mongo2 mongo  //para utilizar el cpu 0 y 1
+
+COPIAR
+         archivos   Maq <--> Contenedor
+
+         docker cp fileOrigen  nameContenedor:/path     ej   docker cp index.html apache:/tmp
+                                                             docker cp apache:/var/log/dpkg.log  .
+
+ESTADO de un CONTENEDOR generando una IMAGEN   no es una buena practica
+         docker commit  nameContenendor  nameImageResult
+
+Destruir Contenedores Automaticamente
+         docker run --rm -ti centos bash  //--rm cuando salimos el contenedor desaparecio
+
+
+VOLUMEN
+         Nos permite persistir datos en nuestra maq local.   Puedo tener una DB en un contenedor y los datos necesitamos persistirlos fuera de el para que no se pierdan
+         Entonces la idea es cuando se va a apagar el contenedor, debemos SALVAR el file de la DB.  En Mysql es /var/lib/mysql
+
+   obtener folder ROOT de docker para ir al directorio de volumenes
+         docker info | grep -i root
+
+   HOST
+         docker run -d --name db 3306:3306 -e "MYSQL_ROOT_PASSWORD=12345678" -v /opt/mysql/:/var/lib/mysql mysql:5.7 
+            esto hace que lo que dentro del contenedor se graba en /var/lib/mysql  en el momento se van guardando en /opt/mysql de nuestra maquina
+            o sea, el mapeo es online
+
+           
+   Anonymus       Docker define un folder random
+         docker run -d --name db 3306:3306 -e "MYSQL_ROOT_PASSWORD=12345678" -v /var/lib/mysql mysql:5.7 
+            al no definir donde lo dejamos en nuestra maq, docker lo define en /..../docker/volumes/
+            NO es aconsejable porque cuando se elimina el contendor, la carpeta no se elimina y nos llena el disco sin control
+  
+   NamedVolumes   Son folder
+         docker volume create NameVolume    ej  docker volume create mysql-data
+         ll /home/.../docker/volumes   y aparecen los folder de cada volume
+
+     tambien se puede hacer
+         docker volume ls              list
+         docker volume rm NameVolume   remove
+
+     para asignarlo a un contenedor hacemos
+         docker run  .....  -v NameVolume:/var/lib/mysql ....
+
+     Dangling
+         son volumenes que se generaron y luego cuando el contenedor se apago estos volumenes siguen existiendo
+
+         docker volume ls -f dangling=true   lista los volumenes que se encuentran en ese estado
+
+         docker volume ls -f dangling=true -q | xargs docker volume rm    asi los elimina
+
+
+     MongoDB
+         docker volume create 
+         docker run -d -p 27017:27017 -v /opt/mongo/:/data/db  mongo
+
+     Jenkins
+         docker run -d --name jenkins -p 8080:8080 -v /opt/jenkins/:/var/jenkins_home jenkins
+
+     Nginx logs
+         docker run -d --name nginx -p 80:80 -v /opt/nginx/:/var/log/nginx nginx
+
+
+     Compartir VOLUME entre varios contenedores
+         Dockerfile
+            FROM centos
+            COPY start.sh /start.sh
+            RUN  chmod +x /start.sh
+            CMD  /start.sh
+
+         start.sh
+            #!/bin/bash
+            while true; do
+               echo "<p> $(date +%H:%M:%S) </p>" >> /opt/index.html  && \
+               sleep 10
+            done
+
+            docker build -t generadorfechas .
+            docker run -v $PWD/common:/opt -d --name gen generadorfechas
+
+         entonces en common/index.html  cada 10seg se guarda una fecha
+
+            docker run -d --name nginx -p 80:80 -v $PWD/common:/usr/share/nginx/html nginx:alpine
+         en localhost vemos la fechas que se graban
+
+         conclusion, hay dos contenedores ejecutandose, y uno graba y el otro lee el mismo file que se persiste en la maq
+
+
+REDES
+     conectar contenedores en una red.  la red por defecto es
+
+      ip a | grep docker      la interface de docker tiene una RED por defecto que se encuentra en el GATEWAY 10.66.33.10
+     
+      docker network ls       para ver toda la red que tengamos
+      docker network ls | grep bridge
+      docker network ls | grep bridge -C 5
+
+      docker network inspect bridge    y  podemos encontrar el GATEWAY, SUBNET etc..
+            Bridge es la red principal
+
+     entonces los contenedores se encuentran dentro de una RED
+
+     para hacer un ping de un contenedor a otro hacemos
+   
+         docker exec NameContenedorOrigen bash -c "ping 10.66.33.1" //es la ip del ContenedorDestino
+
+
+     BRIDGE  es la red por defecto
+       para crear un red hacemos
+
+         docker network create test-network
+
+         docker network ls | grep test    // para verla
+
+         docker network create --help
+
+         docker network create -d bridge --subnet 172.124.10.0/24 --gateway 172.124.0.1 test-network
+
+         docker network inspect test-network | less
+
+         docker run --network test-network -d --name test3 -ti centos
+         docker run --network test-network --ip 172.128.10.50 -d --name test3 -ti centos    // definiendo una IP
+
+         docker inspect test3
+
+
+         para comunicar 2 contendores,  cada uno tiene su IP
+            docker excec cont1 bash -c "ping cont2"  // estando en la IP 1 (contenedor 1) hago un ping a la IP del contenedor 2
+
+            lo que no puedo es hacer un PING a contenedores que se encuentran en Diferentes Redes
+
+
+         para que 2 contenedores que se encuentran en diferentes redes se puedan hacer un Ping, hacemos
+            docker network connect RED1 NameContenedor      // NameContenedor que se encuentra en una RED quedo conectado a la RED1, es bidireccional
+            docker network disconnect RED1 NameContenedor   // esto es para desconectarlo
+
+         docker network rm RED   // elimina la RED,  NO deben haber conectores conectados en la RED
+
+      docker network create --subnet 172.128.10.0/24 --gateway 172.128.10.1 -d bridge my-net     //creamos una red con una IP definida
+
+
+     HOST
+      la red del HOST es la red de nuestra maquina  y  ya existe
+
+         docker run --network host -d --name test2 -ti centos  // esto se ejecuta en nuestra maq o sea tiene la misma IP y hereda todo lo mismo que tiene mi maq,
+                                                                  lo unico que cambia es el usuario que esta ejecutando
+
+     NONE
+         docker run --network none -d --name test2 -ti centos  // este contenedor NO va a tener RED
+
+
+COMPOSE
+   Aplicaciones multi contenedor
+
+   docker compose install
+         sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+         sudo chmod +x /usr/local/bin/docker-compose
+         docker-compose --version
+
+   crear una file con extension .yml
+         version: '3'
+         services:
+         volumes:
+         networks:
+
+   luego ejecutarlo con
+         docker-compose -p NameCompose(que queremos que aparezca) -f FileName.yml up -d
+         docker ps
+   
+   Detenerlo y eliminarlo
+         docker-compose down
+
+   ver variables de entorno dentro del contenedor
+         docker exec -ti mysql bash
+            env
+
+   se puede hacer un BUILD
+         docker-compose build //dentro del archivo yml se debe colocar BUILD: filenameDockerFile
+         
+         esto genera una Imagen
+
+   Limitar recursos
+         web3:
+            image: nginx
+            container_name: nginx2
+            mem-limit: 20m
+            cpuset: "0"   //cuantas CPU queremos
+
+      para verlo   docker stats nginx2
+
+
+REGISTRY
+   la idea es registrar todas las imagenes que subamos en un registry
+
+   docker run -d -p 5000:5000 --name registry -v $PWD/data:/var/lib/registry registry:2
+
+   docker push localhost:5000/hello-world   // para subir la imagen al registry
+   docker pull localhost:5000/hello-world   // para bajar la imagen desde registry
+
+
+RESTART POLICY
+   el default es NO,  existe el ALWAYS
+
+   UNLESS-STOPPED  siempre se reinicie salvo para cuando le hacemos    docker stop PROCESS
+
+   ON-FAILURE   si se detuvo por casusa de un error,  entonces se reinicia
+                siempre que el script termina con EXIT diferente de 0  lo interpreta como que termino mal
+
+

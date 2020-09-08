@@ -1,0 +1,210 @@
+rem Instalar la última versión de NodeJS, para eso entraremos a su web
+rem    oficial y descargaremos el instalador más actualizado
+rem    https://nodejs.org/es/
+rem Desinstalar los paquetes anteriores de Angular CLI
+rem Borrar la caché del gestor de paquetes npm
+rem Instalar la última versión de Angular CLI
+rem Instalar boostrap
+rem resolver conflictos
+rem
+npm uninstall -g angular-cli
+npm uninstall -g @angular/cli
+npm cache verify
+npm cache clean --force
+npm install -g @angular/cli@latest
+ng version
+ng update
+	ng update @angular/cli
+	ng update @angular/core
+	ng update rxjs
+
+Generar un nuevo proyecto de Angular 6
+ng new PROYECTO_ANGULAR6
+cd PROYECTO_ANGULAR6
+ng serve
+ng serve -o  //-o es que abra el chrome cuando termine
+npm i rxjs-compat --save
+npm i bootstrap --save
+npm i @ng-bootstrap/ng-bootstrap --save
+npm i jquery --save
+npm i popper.js --save
+npm i font-awesome angular-font-awesome –save 
+npm i hoek
+npm i angular-collection
+npm i angular-progress-bar@latest --save
+npm i ng5-slider
+npm i ng2-img-max --save
+npm i ng2-completer --save-dev
+npm i ng2-smart-table --save 
+npm i ngx-spinner --save
+npm i ngx-perfect-scrollbar --save
+npm i ngx-permissions --save
+npm i ngx-select-dropdown --save
+npm i chart.js --save
+npm audit fix
+
+. PARA QUE FUNCIONE en el index.html
+  hay que comentar la linea <base href="/">
+ng build --prod
+
+
+// ProgressBar
+npm i angular-progress-bar@latest --save
+
+AngularDatatable
+----------------
+npm install jquery --save
+npm install datatables.net --save
+npm install datatables.net-dt --save
+npm install angular-datatables --save
+npm install @types/jquery --save-dev
+npm install @types/datatables.net --save-dev
+npm install ngx-bootstrap bootstrap --save
+
+
+// npm install --save @angular/material @angular/cdk
+// npm install --save @angular/flex-layout
+// npm install @angular/flex-layout@6.0.0-beta.18 
+// npm i angular-6-datatable --save
+// File Upload
+// npm i ng2-file-upload --save
+// npm i emailjs
+
+
+
+rem dentro del fichero package.json, podrás comprobar que tienes la versión 6.
+rem webapp de Angular 6 en http://localhost:4200/
+
+TIPS  Boostrap y font-awesome   Video 46
+----------------------------------------
+npm install bootstrap --save
+npm install jquery --save
+npm install popper.js --save
+npm install font-awesome angular-font-awesome –save 
+
+en el proyecto de angular, en el archivo de ANGULAR.JSON se definen las librerias
+      "styles": [  
+              "src/styles.css",  
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+            ],  
+      "scripts": [
+              "node_modules/jquery/dist/jquery.slim.min.js",
+              "node_modules/popper.js/dist/umd/popper.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.min.js"
+            ]  
+
+APP_MODULE.TS
+import { AngularFontAwesomeModule } from 'angular-font-awesome';
+@NgModule({
+  //...
+  imports: [
+    //...
+    AngularFontAwesomeModule
+  ],
+
+
+IMAGENES van en SRC/ASSETS/IMG    // luego los IMG se invocan desde cualquier HTML como <img src="assets/img/..." >
+ICONO    va en  SRC/  (favico.ico)
+
+
+NAVBAR va en 
+  app
+    components
+       home
+       shared
+         navbar
+            navbar.component.html
+            navbar.conponent.ts
+y en app.component.html colocamos la etiqueta <app-navbar></app-navbar>
+
+ESTRATEGIA
+. la pagina principal en APP.COMPONENT.HTML
+. Un componente por cada actividad <section>.component.ts
+
+  @Component({
+     selector: 'app-<sectionName>'
+     template: 
+   }) 
+  app.module.ts   (aca es donde decimos que componentes tiene, con lo cual hay que agregar todos los que hacemos)
+  agregarlo en declaration con su correspondiente import
+  cada component se coloca en app.component.html en el lugar que queremos
+--------
+
+
+Crear Componente
+----------------
+ng g c folder/comp --spec=false -is
+  --spec=false  sin archivo de pruebas
+  -is           sin archivo de styles
+
+Crear Module
+------------
+ng g m folder/module  --flat --spec=false
+  --flat              para que genere un nuevo directorio
+ luego hay que importar el modulo en app.module.ts
+
+Crear Service
+------------
+ng g s services/nameService  --flat --spec=false
+
+
+rem REDUX
+rem -----
+rem npm install @ngrx/store
+rem
+rem npm install @ngrx/store-devtools --save
+rem
+
+
+https://nodejs.org/es/
+visual studio code
+
+RESUMEN
+npm uninstall -g angular-cli
+npm uninstall -g @angular/cli
+npm cache verify
+npm cache clean --force
+npm install -g @angular/cli@latest
+ng -version
+
+Generar un nuevo proyecto de Angular 6
+  ng new PROYECTO_ANGULAR6
+  cd PROYECTO_ANGULAR6
+  ng serve
+  ng serve -o  //-o es que abra el chrome cuando termine
+npm install bootstrap --save
+npm install jquery --save
+npm install popper.js --save
+npm install font-awesome –save 
+npm i hoek
+npm i angular-collection
+npm i angular-6-datatable --save
+npm i @swimlane/ngx-datatable --save
+npm install @ngrx/store
+npm install @ngrx/store-devtools --save
+npm audit fix
+cmd/k
+
+Instalar snippes
+----------------
+Angular 6 Snippets - TypeScript, Html, Angular Material, ngRx, RxJS & Flex Layout
+
+Rutas 
+-----
+. en la carpeta app crear el file
+app.routes.ts  y crear el sistema de routes
+
+. en app.module.ts importar el sistema de routes
+
+. en app-component agregar el 
+      <app-navbar></app-navbar>
+      <div class="container">
+          <router-outlet></router-outlet>
+      </div>
+
+. en el navbar.component
+      <li class="nav-item">
+        <a class="nav-link" [routerLink]="['Home]'">Home <span class="sr-only">(current)</span></a>
+      </li>
+
+

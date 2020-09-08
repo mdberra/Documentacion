@@ -1,0 +1,16 @@
+ng build --prod
+esto crea una carpeta /DIST lista para ejecutarse en un servidor
+dentro de la carpeta DIST se encuentra la carpeta para enviar a prod
+. rename la carpeta creada por   docs    y la movamos al mismo nivel que DIST
+. git add .
+. git status
+. git commit -m "App de prod"
+. git push  //entra a prod
+
+en GitHub Pages de settings se puede
+. en None cambiamos a master branch/docs folder
+. le damos SAVE   puede tardar 5 minutos
+. PARA QUE FUNCIONE en el index.html
+hay que comentar la linea <base href="/">
+. Your site is ready to be published at https://mdberra.github.io/PepeCashImg/.
+

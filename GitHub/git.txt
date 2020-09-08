@@ -1,0 +1,43 @@
+git config --global user.name "Marcelo"
+git config --global user.mail "marcelo.berra@gmail.com"
+git init
+git status //todos los cambios
+git add . //agrega todo
+
+git commit -m "Primer commit" // esto lo agrega al repositorio local
+git remote add origin https://github.com/mdberra/  + el nombre del folder.git
+git push -u origin master
+
+git clone https://...
+git status
+git add .
+git commit -m " "
+git push
+mdberra
+Newdestino2018
+
+git add .
+git commit -m "v 1.11"
+git push
+
+------------------------------------------------
+
+git init
+git add .
+git commit -m "texto"
+git push -u origin master
+  mdberra
+  Newdestino2018
+
+------------------------------------------------
+http://rogerdudler.github.io/git-guide/index.es.html
+
+descargar Git
+
+git init
+
+  Crea una copia local del repositorio ejecutando
+git clone /path/to/repository
+
+  Si utilizas un servidor remoto, ejecuta
+git clone username@host:/path/to/repository

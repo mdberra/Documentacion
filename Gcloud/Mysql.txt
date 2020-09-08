@@ -1,0 +1,5 @@
+User        : crear usuario  liberdinaroot  pass Newdestino2018
+Connections : agregar en Add network la IP desde donde me conecto
+Databases   : crear la instancia pepeya
+
+luego conectarse desde el workbench

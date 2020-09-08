@@ -1,0 +1,31 @@
+CLOUD DNS
+
+obtener la IP FIJA de la compute engine     35.202.224.183
+
+ir a Network services/Cloud DNS
+- crear zona
+. zona 
+. nombre de DNS   colocar PepeYa.com.ar
+
+-crear conjunto de registros, minimo 2
+. Tipo de Registro A   colocamos la IP
+. Tipo CNAME   agregando WWW y en canonical name: pepeya.com.ar
+
+en tipo NS  estan las 4 DNS que debemos colocar en donde tenemos registrado el dominio y esperar 24/48hs para la propagacion
+
+
+delegar dominios
+----------------
+https://nic.ar/es/ayuda/instructivos/delegacion-de-dominios
+
+Pepeya.com.ar
+ns-cloud-d1.googledomains.com
+ns-cloud-d2.googledomains.com
+ns-cloud-d3.googledomains.com
+ns-cloud-d4.googledomains.com
+
+liberdina.com.ar
+ns-cloud-b1.googledomains.com
+ns-cloud-b2.googledomains.com
+ns-cloud-b3.googledomains.com
+ns-cloud-b4.googledomains.com

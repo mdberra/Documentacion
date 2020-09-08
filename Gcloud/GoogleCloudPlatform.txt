@@ -1,0 +1,199 @@
+creamos un proyecto en AppEntine Web
+https://console.cloud.google.com/appengine
+goapp serve
+goapp deploy
+
+
+
+
+0. APP ENGINE
+   https://cloud.google.com/appengine/docs/go/download   // bajar e instalar el go_appengine
+
+1. Crear instancia VM de linux en Compute Engine usando GCP
+
+. cada proyecto tiene todos los recursor de la app.
+. Cuando se crea el proyecto hay que entrar en Compute Engine. Esto permite configurar la VM creando la instancia.  Cada proyecto tiene su VM
+. se configura el SO, CPU, Storage, permitir acceso http, etc...   Esto crea la VM
+
+Instance-1
+ip interna 10.128.0.2
+ip externa 104.198.139.113
+
+2. Crear un app  App Engine
+. seleccionamos el lenguaje   JAVA, GO
+. seleccionamos el proyecto
+. ir a Herramientas/Desarrollo  y dice que el repositorio esta vacio. Hay que enviar el contenido al repositorio
+. El repositorio de CLOUD se actualiza desde un GIT local
+  .a gcloud init && git config credential.helper gcloud.cmd                                           //autentica
+  .b git remote add google  https://source.developers.google.com/p/servercentral-147709/r/default    //agrega repositorio CLOUD como remoto
+  .c git push --all google                  // envia el codigo del GitLocal al remoto
+
+  . git remote -v            // muestra los repositorio remotos configurados
+  . git remote add google https://source.developers.google.com/p/servercentral-147709/r/default    // agrega el repositorio remoto
+  . git remote rm google   // borra el repositorio remoto
+  .e git remote show google  // para ver el contenido del repositorio remoto
+  . git push [nombre-remoto][nombre-rama] // para pasar del HEAD local al Repositorio remoto (rama MASTER)
+    .d git push google master
+
+  . git config --list --system   muestra    credential.helper=manager
+  . git config --system --unset credential.helper  // para eliminar la credential
+
+Resumen de comandos  a, b, c, d, e
+
+3. Implementacion
+. al archivo app.yaml tiene la configuracion de la implementacion
+  . tiempo de ejecucion    runtime:go/java/python     api_version:go1
+. para realizar la implementacion utilizaremos GoogleCloudShell desde la terminal que se ABRE debajo del browser.  Es la terminal en la Remote Engine
+
+				gcloud config set project servercentral-147709 \
+					&& gcloud source repos clone go-gae-quickstart-2 \
+					~/src/servercentral-147709/go_gae_quickstart-2016-10-27-09-17  \
+					&& cd ~/src/servercentral-147709/go_gae_quickstart-2016-10-27-09-17 \
+					&& git checkout gcloud
+
+gcloud config set project servercentral-147709 \
+  && gcloud source repos clone go-gae-quickstart ~/src/servercentral-147709/go_gae_quickstart-2016-10-28-09-43  \
+  && cd ~/src/servercentral-147709/go_gae_quickstart-2016-10-28-09-43 \
+  && git checkout gcloud
+
+gcloud config set project servercentral-147709 \
+  && gcloud source repos clone acuicola ~/src/servercentral-147709/acuicola-2016-10-28-10-00  \
+  && cd ~/src/servercentral-147709/acuicola-2016-10-28-10-00 \
+  && git checkout gcloud
+
+
+gcloud config set project proyectoprueba-148119 \
+  && gcloud source repos clone go-gae-quickstart ~/src/proyectoprueba-148119/go_gae_quickstart-2016-10-31-16-04  \
+  && cd ~/src/proyectoprueba-148119/go_gae_quickstart-2016-10-31-16-04 \
+  && git checkout gcloud
+
+
+				gcloud app deploy app.yaml   // para implementar
+
+				gcloud app logs read   // para ver el log
+
+				gcloud app browse      // para ver la app en el browser
+
+4. Eliminar
+ IAM y administracion permite eliminar un proyecto
+
+
+5. MYSQL
+idInstancia  acuicola
+IP           104.154.116.241
+Nombre de conexión de instancia			servercentral-147709:us-central1:acuicola
+contrasena   mdbroot
+miIP         181.44.116.204
+
+mysql -h 104.154.116.241 -u root -p
+
+
+GIT // repositorio
+------------------
+. git config --global user.email "marcelo.berra@gmail.com"     // loggin
+. git init // inicializa un repositorio vacio
+. compuesto por 3 directorios
+  Working dir  (add)  Index  (commit)  Head  (push)  Repositorio remoto
+	git add <filename>  o  git add .
+	git commit -m "Commit message"
+	git push <nombreRemoto> master
+. para cada version colocar etiqueta con un commit id
+  git log  //commit id
+  git tag 1.0.0 1b2c3d4e5f
+
+. para reemplazar el contenido del Working dir con el ultimo Head
+  git checkout -- <filename>
+. para reemplazar el contenido local con el Repositorio remoto
+  git fetch origin
+  git reset --hard origin/master
+. interfaz grafica                       gitk
+. colores especiales para la consola     git config color.ui true
+. mostrar solo una linea                 git config format.pretty oneline
+. agregar archivos en forma interactiva  git add -i
+
+SECUENCIA INSTALACION
+git config --global user.email "marcelo.berra@gmail.com"
+git init
+git add server
+git add app.yaml
+git add .playground
+git commit -m "prueba"
+gcloud init && git config credential.helper gcloud.cmd 
+git remote add google  https://source.developers.google.com/p/servercentral-147709/r/REPOSITORIO
+
+git remote -v
+git remot rm google
+git remote add google https://source.developers.google.com/p/servercentral-147709/r/REPOSITORIO
+git remote -v
+git push google master
+git remote show google
+
+EN GoogleCloudShell
+
+gcloud config set project liberdina-148122 \
+&& gcloud source repos clone liberdina ~/src/liberdina-148122/liberdina-2016-10-31-20-00 \
+&& git checkout gcloud
+
+gcloud config set project servercentral-147709 
+&& gcloud source repos clone acuicola \
+~/src/servercentral-147709/acuicola-2016-10-28-09-00  \
+&& cd ~/src/servercentral-147709/acuicola-2016-10-28-09-00 \
+&& git checkout gcloud
+
+
+        gcloud app deploy app.yaml   // para implementar
+
+        gcloud app logs read   // para ver el log
+
+        gcloud app browse      // para ver la app en el browser
+
+
+
+INSTALACION
+-----------
+GitHub   mdberra Newdestino2016
+------
+Instalacion
+. Descargar Git y ejecutar
+. Descargar GitHubSetup y ejecutar
+. 
+Repositorio/Branch
+code hosting platform for version control and collaboration
+. Crear Repositorio
+  . ingresar en https://github.com/
+  . upper right corner y hacer create new repository
+. Branch
+  . el branch default es el MASTER y es el que va a produccion
+  . hay que trabajar en otro branch
+  . para crear un branch  hacer click en branch master y escribir el nuevo nombre
+  . entonces se crea el branch con una copia del master
+  . luego se puede trabajar en el codigo haciendo COMMIT.  Esto guarda en el nuevo branch
+  . para subir el branch, ingresar en PullRequest, y hacer create Pull Request
+  . por ultimo, MERGE el Pull Request,  esto aplica el cambio en el MASTER
+
+
+
+Cloud Google
+------------
+terminal folder			C:\Users\Marcelo\AppData\Local\Google\Cloud SDK>
+command					gcloud -h
+. gcloud auth login		autoriza la cuenta
+. gcloud init			configuracion
+. instalar en AppEngine
+  . crear un proyecto
+  . dentro de GoogleCloudPlatform ir al margen superior izquierdo, buscar desarrollo
+
+
+liberdina-address    130.211.157.207
+MARTE
+IP Externa 104.198.221.46
+IP Interna 10.128.0.2
+
+HABILITACION DE PORT EN EL FIREWALL
+gcloud compute firewall-rules list
+gcloud compute firewall-rules create allow-http --description "Incoming http Json" --allow tcp:9000 --format json
+gcloud compute firewall-rules delete tcp-9000-443
+
+
+Nombre de licencia:     prtgtrial
+Clave de la licencia:   000014-3PPKFM-8FFKWD-V0KJQG-T4NY4Q-AQY8YN-1K8PQA-Z1F586-P2VTPY-8NE03E

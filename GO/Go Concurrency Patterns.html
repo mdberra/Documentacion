@@ -1,0 +1,2589 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)https://talks.golang.org/2012/concurrency.slide#6 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Go Concurrency Patterns</title>
+    
+    <script type="text/javascript" async="" src="./Go Concurrency Patterns_files/ga.js.descarga"></script><script>
+      var notesEnabled =  false ;
+    </script>
+    <script src="./Go Concurrency Patterns_files/slides.js.descarga"></script>
+
+    
+
+    <script>
+      
+      if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+        var _gaq = _gaq || [];
+        _gaq.push(["_setAccount", "UA-11222381-6"]);
+        _gaq.push(["b._setAccount", "UA-49880327-6"]);
+        window.trackPageview = function() {
+          _gaq.push(["_trackPageview", location.pathname+location.hash]);
+          _gaq.push(["b._trackPageview", location.pathname+location.hash]);
+        };
+        window.trackPageview();
+        window.trackEvent = function(category, action, opt_label, opt_value, opt_noninteraction) {
+          _gaq.push(["_trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+          _gaq.push(["b._trackEvent", category, action, opt_label, opt_value, opt_noninteraction]);
+        };
+      }
+    </script>
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"><meta name="apple-mobile-web-app-capable" content="yes"></head>
+
+  <body style="display: none" class="loaded" cz-shortcut-listen="true">
+
+    <section class="slides layout-widescreen">
+
+      <article>
+        <h1>Go Concurrency Patterns</h1>
+        
+        
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Rob Pike
+  </p>
+  
+
+  
+  <p>
+    Google
+  </p>
+  
+
+          </div>
+        
+      </article>
+
+  
+  
+      <article>
+      
+        <h3>Video</h3>
+        
+  
+  <p>
+    This talk was presented at Google I/O in June 2012.
+  </p>
+  
+<p class="link"><a href="http://www.youtube.com/watch?v=f6kdp27TYZs" target="_blank">Watch the talk on YouTube</a></p>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Introduction</h2>
+      
+      </article>
+  
+  
+  
+      <article class="far-past">
+      
+        <h3>Concurrency features in Go</h3>
+        
+  
+  <p>
+    People seemed fascinated by the concurrency features of Go when the language was first announced.
+  </p>
+  
+
+  
+  <p>
+    Questions:
+  </p>
+  
+
+  <ul>
+  
+    <li>Why is concurrency supported?</li>
+  
+    <li>What is concurrency, anyway?</li>
+  
+    <li>Where does the idea come from?</li>
+  
+    <li>What is it good for?</li>
+  
+    <li>How do I use it?</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="past">
+      
+        <h3>Why?</h3>
+        
+  
+  <p>
+    Look around you. What do you see?
+  </p>
+  
+
+  
+  <p>
+    Do you see a single-stepping world doing one thing at a time?
+  </p>
+  
+
+  
+  <p>
+    Or do you see a complex world of interacting, independently behaving pieces?
+  </p>
+  
+
+  
+  <p>
+    That's why. Sequential processing on its own does not model the world's behavior.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article class="current">
+      
+        <h3>What is concurrency?</h3>
+        
+  
+  <p>
+    Concurrency is the composition of independently executing computations.
+  </p>
+  
+
+  
+  <p>
+    Concurrency is a way to structure software, particularly as a way to write clean code that interacts well with the real world.
+  </p>
+  
+
+  
+  <p>
+    It is not parallelism.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article class="next">
+      
+        <h3>Concurrency is not parallelism</h3>
+        
+  
+  <p>
+    Concurrency is not parallelism, although it enables parallelism.
+  </p>
+  
+
+  
+  <p>
+    If you have only one processor, your program can still be concurrent  but it cannot be parallel.
+  </p>
+  
+
+  
+  <p>
+    On the other hand, a well-written concurrent program might run efficiently in parallel on a multiprocessor. That property could be important...
+  </p>
+  
+
+  
+  <p>
+    For more on that distinction, see the link below. Too much to discuss here.
+  </p>
+  
+<p class="link"><a href="http://golang.org/s/concurrency-is-not-parallelism" target="_blank">golang.org/s/concurrency-is-not-parallelism</a></p>
+      
+      </article>
+  
+  
+  
+      <article class="far-next">
+      
+        <h3>A model for software construction</h3>
+        
+  
+  <p>
+    Easy to understand.
+  </p>
+  
+
+  
+  <p>
+    Easy to use.
+  </p>
+  
+
+  
+  <p>
+    Easy to reason about.
+  </p>
+  
+
+  
+  <p>
+    You don't need to be an expert!
+  </p>
+  
+
+  
+  <p>
+    (Much nicer than dealing with the minutiae of parallelism (threads, semaphores, locks, barriers, etc.))
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>History</h3>
+        
+  
+  <p>
+    To many, the concurrency features of Go seemed new.
+  </p>
+  
+
+  
+  <p>
+    But they are rooted in a long history, reaching back to Hoare's CSP in 1978 and even Dijkstra's guarded commands (1975).
+  </p>
+  
+
+  
+  <p>
+    Languages with similar features:
+  </p>
+  
+
+  <ul>
+  
+    <li>Occam (May, 1983)</li>
+  
+    <li>Erlang (Armstrong, 1986)</li>
+  
+    <li>Newsqueak (Pike, 1988)</li>
+  
+    <li>Concurrent ML (Reppy, 1993)</li>
+  
+    <li>Alef (Winterbottom, 1995)</li>
+  
+    <li>Limbo (Dorward, Pike, Winterbottom, 1996).</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Distinction</h3>
+        
+  
+  <p>
+    Go is the latest on the Newsqueak-Alef-Limbo branch, distinguished by first-class channels.
+  </p>
+  
+
+  
+  <p>
+    Erlang is closer to the original CSP, where you communicate to a process by name rather than over a channel.
+  </p>
+  
+
+  
+  <p>
+    The models are equivalent but express things differently.
+  </p>
+  
+
+  
+  <p>
+    Rough analogy: writing to a file by name (process, Erlang) vs. writing to a file descriptor (channel, Go).
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h2>Basic Examples</h2>
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>A boring function</h3>
+        
+  
+  <p>
+    We need an example to show the interesting properties of the concurrency primitives.
+  </p>
+  
+
+  
+  <p>
+    To avoid distraction, we make it a boring example.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	boring("boring!")
+}
+
+</span></pre>
+
+<pre><span num="15">func boring(msg string) {</span>
+<span num="16">    for i := 0; ; i++ {</span>
+<span num="17">        fmt.Println(msg, i)</span>
+<span num="18">        time.Sleep(time.Second)</span>
+<span num="19">    }</span>
+<span num="20">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Slightly less boring</h3>
+        
+  
+  <p>
+    Make the intervals between messages unpredictable (still under a second).
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+func main() {
+	boring("boring!") // HL
+}
+
+</span></pre>
+
+<pre><span num="16">func boring(msg string) {</span>
+<span num="17">    for i := 0; ; i++ {</span>
+<span num="18">        fmt.Println(msg, i)</span>
+<span num="19">        time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)</span>
+<span num="20">    }</span>
+<span num="21">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article class="">
+      
+        <h3>Running it</h3>
+        
+  
+  <p>
+    The boring function runs on forever, like a boring party guest.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+</span></pre>
+
+<pre><span num="11">func main() {</span>
+<span num="12">    <b>boring("boring!")</b></span>
+<span num="13">}</span>
+<span num="14"></span>
+<span num="16">func boring(msg string) {</span>
+<span num="17">    for i := 0; ; i++ {</span>
+<span num="18">        fmt.Println(msg, i)</span>
+<span num="19">        time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)</span>
+<span num="20">    }</span>
+<span num="21">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Ignoring it</h3>
+        
+  
+  <p>
+    The go statement runs the function as usual, but doesn't make the caller wait.
+  </p>
+  
+
+  
+  <p>
+    It launches a goroutine.
+  </p>
+  
+
+  
+  <p>
+    The functionality is analogous to the &amp; on the end of a shell command.
+  </p>
+  
+
+  <div class="code playground">
+
+
+<pre><span num="3">package main</span>
+<span num="4"></span>
+<span num="5">import (</span>
+<span num="6">    "fmt"</span>
+<span num="7">    "math/rand"</span>
+<span num="8">    "time"</span>
+<span num="9">)</span>
+<span num="10"></span>
+<span num="11">func main() {</span>
+<span num="12">    <b>go boring("boring!")</b></span>
+<span num="13">}</span>
+</pre>
+
+<pre style="display: none"><span>// STOP OMIT
+
+func boring(msg string) {
+	for i := 0; ; i++ {
+		fmt.Println(msg, i)
+		time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+	}
+}
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Ignoring it a little less</h3>
+        
+  
+  <p>
+    When main returns, the program exits and takes the boring function down with it.
+  </p>
+  
+
+  
+  <p>
+    We can hang around a little, and on the way show that both main and the launched goroutine are running.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+</span></pre>
+
+<pre><span num="11">func main() {</span>
+<span num="12">    go boring("boring!")</span>
+<span num="13">    fmt.Println("I'm listening.")</span>
+<span num="14">    time.Sleep(2 * time.Second)</span>
+<span num="15">    fmt.Println("You're boring; I'm leaving.")</span>
+<span num="16">}</span>
+</pre>
+
+<pre style="display: none"><span>// STOP OMIT
+
+func boring(msg string) {
+	for i := 0; ; i++ {
+		fmt.Println(msg, i)
+		time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+	}
+}
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Goroutines</h3>
+        
+  
+  <p>
+    What is a goroutine? It's an independently executing function, launched by a go statement.
+  </p>
+  
+
+  
+  <p>
+    It has its own call stack, which grows and shrinks as required.
+  </p>
+  
+
+  
+  <p>
+    It's very cheap. It's practical to have thousands, even hundreds of thousands of goroutines.
+  </p>
+  
+
+  
+  <p>
+    It's not a thread.
+  </p>
+  
+
+  
+  <p>
+    There might be only one thread in a program with thousands of goroutines.
+  </p>
+  
+
+  
+  <p>
+    Instead, goroutines are multiplexed dynamically onto threads as needed to keep all the goroutines running.
+  </p>
+  
+
+  
+  <p>
+    But if you think of it as a very cheap thread, you won't be far off.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Communication</h3>
+        
+  
+  <p>
+    Our boring examples cheated: the main function couldn't see the output from the other goroutine.
+  </p>
+  
+
+  
+  <p>
+    It was just printed to the screen, where we pretended we saw a conversation.
+  </p>
+  
+
+  
+  <p>
+    Real conversations require communication.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Channels</h3>
+        
+  
+  <p>
+    A channel in Go provides a connection between two goroutines, allowing them to communicate.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="9">    // Declaring and initializing.</span>
+<span num="10">    var c chan int</span>
+<span num="11">    c = make(chan int)</span>
+<span num="12">    // or</span>
+<span num="13">    <b>c := make(chan int)</b></span>
+</pre>
+
+
+</div>
+
+  <div class="code">
+
+
+<pre><span num="17">    // Sending on a channel.</span>
+<span num="18">    <b>c &lt;- 1</b></span>
+</pre>
+
+
+</div>
+
+  <div class="code">
+
+
+<pre><span num="22">    // Receiving from a channel.</span>
+<span num="23">    // The "arrow" indicates the direction of data flow.</span>
+<span num="24">    <b>value = &lt;-c</b></span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Using channels</h3>
+        
+  
+  <p>
+    A channel connects the main and boring goroutines so they can communicate.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+</span></pre>
+
+<pre><span num="12">func main() {</span>
+<span num="13">    c := make(chan string)</span>
+<span num="14">    go boring("boring!", c)</span>
+<span num="15">    for i := 0; i &lt; 5; i++ {</span>
+<span num="16">        <b>fmt.Printf("You say: %q\n", &lt;-c) // Receive expression is just a value.</b></span>
+<span num="17">    }</span>
+<span num="18">    fmt.Println("You're boring; I'm leaving.")</span>
+<span num="19">}</span>
+</pre>
+
+<pre style="display: none"><span>
+// START2 OMIT
+func boring(msg string, c chan string) {
+	for i := 0; ; i++ {
+		c &lt;- fmt.Sprintf("%s %d", msg, i) // Expression to be sent can be any suitable value. // HL
+		time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+	}
+}
+// STOP2 OMIT
+
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+  <div class="code">
+
+
+<pre><span num="23">func boring(msg string, c chan string) {</span>
+<span num="24">    for i := 0; ; i++ {</span>
+<span num="25">        <b>c &lt;- fmt.Sprintf("%s %d", msg, i) // Expression to be sent can be any suitable value.</b></span>
+<span num="26">        time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)</span>
+<span num="27">    }</span>
+<span num="28">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Synchronization</h3>
+        
+  
+  <p>
+    When the main function executes &lt;–c, it will wait for a value to be sent.
+  </p>
+  
+
+  
+  <p>
+    Similarly, when the boring function executes c &lt;– value, it waits for a receiver to be ready.
+  </p>
+  
+
+  
+  <p>
+    A sender and receiver must both be ready to play their part in the communication. Otherwise we wait until they are.
+  </p>
+  
+
+  
+  <p>
+    Thus channels both communicate and synchronize.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>An aside about buffered channels</h3>
+        
+  
+  <p>
+    Note for experts: Go channels can also be created with a buffer.
+  </p>
+  
+
+  
+  <p>
+    Buffering removes synchronization.
+  </p>
+  
+
+  
+  <p>
+    Buffering makes them more like Erlang's mailboxes.
+  </p>
+  
+
+  
+  <p>
+    Buffered channels can be important for some problems but they are more subtle to reason about.
+  </p>
+  
+
+  
+  <p>
+    We won't need them today.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>The Go approach</h3>
+        
+  
+  <p>
+    Don't communicate by sharing memory, share memory by communicating.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>"Patterns"</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Generator: function that returns a channel</h3>
+        
+  
+  <p>
+    Channels are first-class values, just like strings or integers.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+func main() {
+</span></pre>
+
+<pre><span num="13">    <b>c := boring("boring!") // Function returning a channel.</b></span>
+<span num="14">    for i := 0; i &lt; 5; i++ {</span>
+<span num="15">        fmt.Printf("You say: %q\n", &lt;-c)</span>
+<span num="16">    }</span>
+<span num="17">    fmt.Println("You're boring; I'm leaving.")</span>
+</pre>
+
+<pre style="display: none"><span>}
+
+// START2 OMIT
+func boring(msg string) &lt;-chan string { // Returns receive-only channel of strings. // HL
+	c := make(chan string)
+	go func() { // We launch the goroutine from inside the function. // HL
+		for i := 0; ; i++ {
+			c &lt;- fmt.Sprintf("%s %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+		}
+	}()
+	return c // Return the channel to the caller. // HL
+}
+// STOP2 OMIT
+
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+  <div class="code">
+
+
+<pre><span num="22"><b>func boring(msg string) &lt;-chan string { // Returns receive-only channel of strings.</b></span>
+<span num="23">    c := make(chan string)</span>
+<span num="24">    <b>go func() { // We launch the goroutine from inside the function.</b></span>
+<span num="25">        for i := 0; ; i++ {</span>
+<span num="26">            c &lt;- fmt.Sprintf("%s %d", msg, i)</span>
+<span num="27">            time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)</span>
+<span num="28">        }</span>
+<span num="29">    }()</span>
+<span num="30">    <b>return c // Return the channel to the caller.</b></span>
+<span num="31">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Channels as a handle on a service</h3>
+        
+  
+  <p>
+    Our boring function returns a channel that lets us communicate with the boring service it provides.
+  </p>
+  
+
+  
+  <p>
+    We can have more instances of the service.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+</span></pre>
+
+<pre><span num="12">func main() {</span>
+<span num="13">    <b>joe := boring("Joe")</b></span>
+<span num="14">    <b>ann := boring("Ann")</b></span>
+<span num="15">    for i := 0; i &lt; 5; i++ {</span>
+<span num="16">        fmt.Println(&lt;-joe)</span>
+<span num="17">        fmt.Println(&lt;-ann)</span>
+<span num="18">    }</span>
+<span num="19">    fmt.Println("You're both boring; I'm leaving.")</span>
+<span num="20">}</span>
+</pre>
+
+<pre style="display: none"><span>
+// START2 OMIT
+func boring(msg string) &lt;-chan string { // Returns receive-only channel of strings. // HL
+	c := make(chan string)
+	go func() { // We launch the goroutine from inside the function. // HL
+		for i := 0; ; i++ {
+			c &lt;- fmt.Sprintf("%s: %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+		}
+	}()
+	return c // Return the channel to the caller. // HL
+}
+// STOP2 OMIT
+
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Multiplexing</h3>
+        
+  
+  <p>
+    These programs make Joe and Ann count in lockstep.
+<br>
+
+    We can instead use a fan-in function to let whosoever is ready talk.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="36"><b>func fanIn(input1, input2 &lt;-chan string) &lt;-chan string {</b></span>
+<span num="37">    c := make(chan string)</span>
+<span num="38">    <b>go func() { for { c &lt;- &lt;-input1 } }()</b></span>
+<span num="39">    <b>go func() { for { c &lt;- &lt;-input2 } }()</b></span>
+<span num="40">    return c</span>
+<span num="41">}</span>
+</pre>
+
+
+</div>
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+</span></pre>
+
+<pre><span num="12">func main() {</span>
+<span num="13">    <b>c := fanIn(boring("Joe"), boring("Ann"))</b></span>
+<span num="14">    for i := 0; i &lt; 10; i++ {</span>
+<span num="15">        <b>fmt.Println(&lt;-c)</b></span>
+<span num="16">    }</span>
+<span num="17">    fmt.Println("You're both boring; I'm leaving.")</span>
+<span num="18">}</span>
+</pre>
+
+<pre style="display: none"><span>
+// START2 OMIT
+func boring(msg string) &lt;-chan string { // Returns receive-only channel of strings. // HL
+	c := make(chan string)
+	go func() { // We launch the goroutine from inside the function. // HL
+		for i := 0; ; i++ {
+			c &lt;- fmt.Sprintf("%s: %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(2e3)) * time.Millisecond)
+		}
+	}()
+	return c // Return the channel to the caller. // HL
+}
+// STOP2 OMIT
+
+
+// START3 OMIT
+func fanIn(input1, input2 &lt;-chan string) &lt;-chan string { // HL
+	c := make(chan string)
+	go func() { for { c &lt;- &lt;-input1 } }() // HL
+	go func() { for { c &lt;- &lt;-input2 } }() // HL
+	return c
+}
+// STOP3 OMIT
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Fan-in</h3>
+        
+<div class="image">
+  <img src="./Go Concurrency Patterns_files/gophermegaphones.jpg">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Restoring sequencing</h3>
+        
+  
+  <p>
+    Send a channel on a channel, making goroutine wait its turn.
+  </p>
+  
+
+  
+  <p>
+    Receive all messages, then enable them again by sending on a private channel.
+  </p>
+  
+
+  
+  <p>
+    First we define a message type that contains a channel for the reply.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="12">type Message struct {</span>
+<span num="13">    str string</span>
+<span num="14">    <b>wait chan bool</b></span>
+<span num="15">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Restoring sequencing.</h3>
+        
+  
+  <p>
+    Each speaker must wait for a go-ahead.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="21">    for i := 0; i &lt; 5; i++ {</span>
+<span num="22">        msg1 := &lt;-c; fmt.Println(msg1.str)</span>
+<span num="23">        msg2 := &lt;-c; fmt.Println(msg2.str)</span>
+<span num="24">        msg1.wait &lt;- true</span>
+<span num="25">        msg2.wait &lt;- true</span>
+<span num="26">    }</span>
+</pre>
+
+
+</div>
+
+  <div class="code">
+
+
+<pre><span num="34">    waitForIt := make(chan bool) // Shared between all messages.</span>
+</pre>
+
+
+</div>
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+// START0 OMIT
+type Message struct {
+	str string
+	wait chan bool // HL
+}
+// STOP0 OMIT
+
+func main() {
+	c := fanIn(boring("Joe"), boring("Ann")) // HL
+// START1 OMIT
+	for i := 0; i &lt; 5; i++ {
+		msg1 := &lt;-c; fmt.Println(msg1.str)
+		msg2 := &lt;-c; fmt.Println(msg2.str)
+		msg1.wait &lt;- true
+		msg2.wait &lt;- true
+	}
+// STOP1 OMIT
+	fmt.Println("You're all boring; I'm leaving.")
+}
+
+func boring(msg string) &lt;-chan Message { // Returns receive-only channel of strings. // HL
+	c := make(chan Message)
+// START2 OMIT
+	waitForIt := make(chan bool) // Shared between all messages.
+// STOP2 OMIT
+	go func() { // We launch the goroutine from inside the function. // HL
+		for i := 0; ; i++ {
+</span></pre>
+
+<pre><span num="39">            c &lt;- Message{ fmt.Sprintf("%s: %d", msg, i), waitForIt }</span>
+<span num="40">            time.Sleep(time.Duration(rand.Intn(2e3)) * time.Millisecond)</span>
+<span num="41">            &lt;-waitForIt</span>
+</pre>
+
+<pre style="display: none"><span>		}
+	}()
+	return c // Return the channel to the caller. // HL
+}
+
+
+// START3 OMIT
+func fanIn(inputs ... &lt;-chan Message) &lt;-chan Message { // HL
+	c := make(chan Message)
+	for i := range inputs {
+		input := inputs[i] // New instance of 'input' for each loop.
+		go func() { for { c &lt;- &lt;-input } }()
+	}
+	return c
+}
+// STOP3 OMIT
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Select</h3>
+        
+  
+  <p>
+    A control structure unique to concurrency.
+  </p>
+  
+
+  
+  <p>
+    The reason channels and goroutines are built into the language.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Select</h3>
+        
+  
+  <p>
+    The select statement provides another way to handle multiple channels.
+<br>
+
+    It's like a switch, but each case is a communication:
+<br>
+
+    - All channels are evaluated.
+<br>
+
+    - Selection blocks until one communication can proceed, which then does.
+<br>
+
+    - If multiple can proceed, select chooses pseudo-randomly.
+<br>
+
+    - A default clause, if present, executes immediately if no channel is ready.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="8">    select {</span>
+<span num="9">    case v1 := &lt;-c1:</span>
+<span num="10">        fmt.Printf("received %v from c1\n", v1)</span>
+<span num="11">    case v2 := &lt;-c2:</span>
+<span num="12">        fmt.Printf("received %v from c2\n", v1)</span>
+<span num="13">    case c3 &lt;- 23:</span>
+<span num="14">        fmt.Printf("sent %v to c3\n", 23)</span>
+<span num="15">    default:</span>
+<span num="16">        fmt.Printf("no one was ready to communicate\n")</span>
+<span num="17">    }</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Fan-in again</h3>
+        
+  
+  <p>
+    Rewrite our original fanIn function. Only one goroutine is needed. Old:
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="36"><b>func fanIn(input1, input2 &lt;-chan string) &lt;-chan string {</b></span>
+<span num="37">    c := make(chan string)</span>
+<span num="38">    <b>go func() { for { c &lt;- &lt;-input1 } }()</b></span>
+<span num="39">    <b>go func() { for { c &lt;- &lt;-input2 } }()</b></span>
+<span num="40">    return c</span>
+<span num="41">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Fan-in using select</h3>
+        
+  
+  <p>
+    Rewrite our original fanIn function. Only one goroutine is needed. New:
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+// START1 OMIT
+func main() {
+	c := fanIn(boring("Joe"), boring("Ann")) // HL
+	for i := 0; i &lt; 10; i++ {
+		fmt.Println(&lt;-c) // HL
+	}
+	fmt.Println("You're both boring; I'm leaving.")
+}
+// STOP1 OMIT
+
+// START2 OMIT
+func boring(msg string) &lt;-chan string { // Returns receive-only channel of strings. // HL
+	c := make(chan string)
+	go func() { // We launch the goroutine from inside the function. // HL
+		for i := 0; ; i++ {
+			c &lt;- fmt.Sprintf("%s: %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+		}
+	}()
+	return c // Return the channel to the caller. // HL
+}
+// STOP2 OMIT
+
+
+</span></pre>
+
+<pre><span num="36"><b>func fanIn(input1, input2 &lt;-chan string) &lt;-chan string {</b></span>
+<span num="37">    c := make(chan string)</span>
+<span num="38">    <b>go func() {</b></span>
+<span num="39">        for {</span>
+<span num="40">            <b>select {</b></span>
+<span num="41">            <b>case s := &lt;-input1:  c &lt;- s</b></span>
+<span num="42">            <b>case s := &lt;-input2:  c &lt;- s</b></span>
+<span num="43">            <b>}</b></span>
+<span num="44">        }</span>
+<span num="45">    }()</span>
+<span num="46">    return c</span>
+<span num="47">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Timeout using select</h3>
+        
+  
+  <p>
+    The time.After function returns a channel that blocks for the specified duration.
+<br>
+
+    After the interval, the channel delivers the current time, once.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+</span></pre>
+
+<pre><span num="12">func main() {</span>
+<span num="13">    c := boring("Joe")</span>
+<span num="14">    for {</span>
+<span num="15">        select {</span>
+<span num="16">        case s := &lt;-c:</span>
+<span num="17">            fmt.Println(s)</span>
+<span num="18">        <b>case &lt;-time.After(1 * time.Second):</b></span>
+<span num="19">            fmt.Println("You're too slow.")</span>
+<span num="20">            return</span>
+<span num="21">        }</span>
+<span num="22">    }</span>
+<span num="23">}</span>
+</pre>
+
+<pre style="display: none"><span>
+// START2 OMIT
+func boring(msg string) &lt;-chan string { // Returns receive-only channel of strings. // HL
+	c := make(chan string)
+	go func() { // We launch the goroutine from inside the function. // HL
+		for i := 0; ; i++ {
+			c &lt;- fmt.Sprintf("%s: %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(1500)) * time.Millisecond)
+		}
+	}()
+	return c // Return the channel to the caller. // HL
+}
+// STOP2 OMIT
+
+
+// START3 OMIT
+func fanIn(input1, input2 &lt;-chan string) &lt;-chan string { // HL
+	c := make(chan string)
+	go func() {
+		for {
+			select {
+			case s := &lt;-input1:
+				c &lt;- s
+			case s := &lt;-input2:
+				c &lt;- s
+			}
+		}
+	}()
+	return c
+}
+// STOP3 OMIT
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Timeout for whole conversation using select</h3>
+        
+  
+  <p>
+    Create the timer once, outside the loop, to time out the entire conversation.
+<br>
+
+    (In the previous program, we had a timeout for each message.)
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+</span></pre>
+
+<pre><span num="12">func main() {</span>
+<span num="13">    c := boring("Joe")</span>
+<span num="14">    <b>timeout := time.After(5 * time.Second)</b></span>
+<span num="15">    for {</span>
+<span num="16">        select {</span>
+<span num="17">        case s := &lt;-c:</span>
+<span num="18">            fmt.Println(s)</span>
+<span num="19">        <b>case &lt;-timeout:</b></span>
+<span num="20">            fmt.Println("You talk too much.")</span>
+<span num="21">            return</span>
+<span num="22">        }</span>
+<span num="23">    }</span>
+<span num="24">}</span>
+</pre>
+
+<pre style="display: none"><span>
+// START2 OMIT
+func boring(msg string) &lt;-chan string { // Returns receive-only channel of strings. // HL
+	c := make(chan string)
+	go func() { // We launch the goroutine from inside the function. // HL
+		for i := 0; ; i++ {
+			c &lt;- fmt.Sprintf("%s: %d", msg, i)
+			time.Sleep(time.Duration(rand.Intn(1500)) * time.Millisecond)
+		}
+	}()
+	return c // Return the channel to the caller. // HL
+}
+// STOP2 OMIT
+
+
+// START3 OMIT
+func fanIn(input1, input2 &lt;-chan string) &lt;-chan string { // HL
+	c := make(chan string)
+	go func() {
+		for {
+			select {
+			case s := &lt;-input1:
+				c &lt;- s
+			case s := &lt;-input2:
+				c &lt;- s
+			}
+		}
+	}()
+	return c
+}
+// STOP3 OMIT
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Quit channel</h3>
+        
+  
+  <p>
+    We can turn this around and tell Joe to stop when we're tired of listening to him.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="13">    <b>quit := make(chan bool)</b></span>
+<span num="14">    c := boring("Joe", quit)</span>
+<span num="15">    for i := rand.Intn(10); i &gt;= 0; i-- { fmt.Println(&lt;-c) }</span>
+<span num="16">    <b>quit &lt;- true</b></span>
+</pre>
+
+
+</div>
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+func main() {
+// START1 OMIT
+	quit := make(chan bool) // HL
+	c := boring("Joe", quit)
+	for i := rand.Intn(10); i &gt;= 0; i-- { fmt.Println(&lt;-c) }
+	quit &lt;- true // HL
+// STOP1 OMIT
+}
+
+func boring(msg string, quit &lt;-chan bool) &lt;-chan string {
+	c := make(chan string)
+	go func() { // HL
+		for i := 0; ; i++ {
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+</span></pre>
+
+<pre><span num="26">            select {</span>
+<span num="27">            case c &lt;- fmt.Sprintf("%s: %d", msg, i):</span>
+<span num="28">                // do nothing</span>
+<span num="29">            <b>case &lt;-quit:</b></span>
+<span num="30">                return</span>
+<span num="31">            }</span>
+</pre>
+
+<pre style="display: none"><span>		}
+	}()
+	return c
+}
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Receive on quit channel</h3>
+        
+  
+  <p>
+    How do we know it's finished? Wait for it to tell us it's done: receive on the quit channel
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="16">    <b>quit := make(chan string)</b></span>
+<span num="17">    <b>c := boring("Joe", quit)</b></span>
+<span num="18">    for i := rand.Intn(10); i &gt;= 0; i-- { fmt.Println(&lt;-c) }</span>
+<span num="19">    <b>quit &lt;- "Bye!"</b></span>
+<span num="20">    <b>fmt.Printf("Joe says: %q\n", &lt;-quit)</b></span>
+</pre>
+
+
+</div>
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+func cleanup() {
+}
+
+func main() {
+// START1 OMIT
+	quit := make(chan string) // HL
+	c := boring("Joe", quit) // HL
+	for i := rand.Intn(10); i &gt;= 0; i-- { fmt.Println(&lt;-c) }
+	quit &lt;- "Bye!" // HL
+	fmt.Printf("Joe says: %q\n", &lt;-quit) // HL
+// STOP1 OMIT
+}
+
+func boring(msg string, quit chan string) &lt;-chan string {
+	c := make(chan string) // HL
+	go func() {
+		for i := 0; ; i++ {
+			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+</span></pre>
+
+<pre><span num="30">            select {</span>
+<span num="31">            case c &lt;- fmt.Sprintf("%s: %d", msg, i):</span>
+<span num="32">                // do nothing</span>
+<span num="33">            <b>case &lt;-quit:</b></span>
+<span num="34">                cleanup()</span>
+<span num="35">                <b>quit &lt;- "See you!"</b></span>
+<span num="36">                return</span>
+<span num="37">            }</span>
+</pre>
+
+<pre style="display: none"><span>		}
+	}()
+	return c
+}
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Daisy-chain</h3>
+        
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import "fmt"
+
+</span></pre>
+
+<pre><span num="7">func f(left, right chan int) {</span>
+<span num="8">    left &lt;- 1 + &lt;-right</span>
+<span num="9">}</span>
+<span num="10"></span>
+<span num="11">func main() {</span>
+<span num="12">    const n = 10000</span>
+<span num="13">    leftmost := make(chan int)</span>
+<span num="14">    right := leftmost</span>
+<span num="15">    left := leftmost</span>
+<span num="16">    for i := 0; i &lt; n; i++ {</span>
+<span num="17">        right = make(chan int)</span>
+<span num="18">        go f(left, right)</span>
+<span num="19">        left = right</span>
+<span num="20">    }</span>
+<span num="21">    go func(c chan int) { c &lt;- 1 }(right)</span>
+<span num="22">    fmt.Println(&lt;-leftmost)</span>
+<span num="23">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Chinese whispers, gopher style</h3>
+        
+<div class="image">
+  <img src="./Go Concurrency Patterns_files/gophereartrumpet.jpg">
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Systems software</h3>
+        
+  
+  <p>
+    Go was designed for writing systems software.
+<br>
+
+    Let's see how the concurrency features come into play.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Example: Google Search</h3>
+        
+  
+  <p>
+    Q: What does Google search do?
+  </p>
+  
+
+  
+  <p>
+    A: Given a query, return a page of search results (and some ads).
+  </p>
+  
+
+  
+  <p>
+    Q: How do we get the search results?
+  </p>
+  
+
+  
+  <p>
+    A: Send the query to Web search, Image search, YouTube, Maps, News,etc., then mix the results.
+  </p>
+  
+
+  
+  <p>
+    How do we implement this?
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Google Search: A fake framework</h3>
+        
+  
+  <p>
+    We can simulate the search function, much as we simulated conversation before.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="24">var (</span>
+<span num="25">    Web = fakeSearch("web")</span>
+<span num="26">    Image = fakeSearch("image")</span>
+<span num="27">    Video = fakeSearch("video")</span>
+<span num="28">)</span>
+<span num="29"></span>
+<span num="30"><b>type Search func(query string) Result</b></span>
+<span num="31"></span>
+<span num="32">func fakeSearch(kind string) Search {</span>
+<span num="33">        return func(query string) Result {</span>
+<span num="34">              time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)</span>
+<span num="35">              return Result(fmt.Sprintf("%s result for %q\n", kind, query))</span>
+<span num="36">        }</span>
+<span num="37">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Google Search: Test the framework</h3>
+        
+  <div class="code playground">
+<pre style="display: none"><span>
+// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+type Result string
+
+// START1 OMIT
+func Google(query string) (results []Result) {
+	results = append(results, Web(query))
+	results = append(results, Image(query))
+	results = append(results, Video(query))
+	return
+}
+// STOP1 OMIT
+
+// START2 OMIT
+var (
+	Web = fakeSearch("web")
+	Image = fakeSearch("image")
+	Video = fakeSearch("video")
+)
+
+type Search func(query string) Result // HL
+
+func fakeSearch(kind string) Search {
+        return func(query string) Result {
+	          time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+	          return Result(fmt.Sprintf("%s result for %q\n", kind, query))
+        }
+}
+// STOP2 OMIT
+
+</span></pre>
+
+<pre><span num="40">func main() {</span>
+<span num="41">    rand.Seed(time.Now().UnixNano())</span>
+<span num="42">    start := time.Now()</span>
+<span num="43">    <b>results := Google("golang")</b></span>
+<span num="44">    elapsed := time.Since(start)</span>
+<span num="45">    fmt.Println(results)</span>
+<span num="46">    fmt.Println(elapsed)</span>
+<span num="47">}</span>
+</pre>
+
+
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Google Search 1.0</h3>
+        
+  
+  <p>
+    The Google function takes a query and returns a slice of Results (which are just strings).
+  </p>
+  
+
+  
+  <p>
+    Google invokes Web, Image, and Video searches serially, appending them to the results slice.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>
+// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+type Result string
+
+</span></pre>
+
+<pre><span num="15">func Google(query string) (results []Result) {</span>
+<span num="16">    results = append(results, Web(query))</span>
+<span num="17">    results = append(results, Image(query))</span>
+<span num="18">    results = append(results, Video(query))</span>
+<span num="19">    return</span>
+<span num="20">}</span>
+</pre>
+
+<pre style="display: none"><span>
+// START2 OMIT
+var (
+	Web = fakeSearch("web")
+	Image = fakeSearch("image")
+	Video = fakeSearch("video")
+)
+
+type Search func(query string) Result // HL
+
+func fakeSearch(kind string) Search {
+        return func(query string) Result {
+	          time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+	          return Result(fmt.Sprintf("%s result for %q\n", kind, query))
+        }
+}
+// STOP2 OMIT
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	start := time.Now()
+	results := Google("golang") // HL
+	elapsed := time.Since(start)
+	fmt.Println(results)
+	fmt.Println(elapsed)
+}
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Google Search 2.0</h3>
+        
+  
+  <p>
+    Run the Web, Image, and Video searches concurrently, and wait for all results.
+  </p>
+  
+
+  
+  <p>
+    No locks.  No condition variables.  No callbacks.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+type Result string
+type Search func(query string) Result
+
+var (
+	Web = fakeSearch("web")
+	Image = fakeSearch("image")
+	Video = fakeSearch("video")
+)
+
+
+</span></pre>
+
+<pre><span num="21">func Google(query string) (results []Result) {</span>
+<span num="22">    c := make(chan Result)</span>
+<span num="23">    go func() { c &lt;- Web(query) } ()</span>
+<span num="24">    go func() { c &lt;- Image(query) } ()</span>
+<span num="25">    go func() { c &lt;- Video(query) } ()</span>
+<span num="26"></span>
+<span num="27">    for i := 0; i &lt; 3; i++ {</span>
+<span num="28">        result := &lt;-c</span>
+<span num="29">        results = append(results, result)</span>
+<span num="30">    }</span>
+<span num="31">    return</span>
+<span num="32">}</span>
+</pre>
+
+<pre style="display: none"><span>
+func fakeSearch(kind string) Search {
+        return func(query string) Result {
+	          time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+	          return Result(fmt.Sprintf("%s result for %q\n", kind, query))
+        }
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	start := time.Now()
+	results := Google("golang")
+	elapsed := time.Since(start)
+	fmt.Println(results)
+	fmt.Println(elapsed)
+}
+
+
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Google Search 2.1</h3>
+        
+  
+  <p>
+    Don't wait for slow servers. No locks.  No condition variables.  No callbacks.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+type Result string
+type Search func(query string) Result
+
+var (
+	Web = fakeSearch("web")
+	Image = fakeSearch("image")
+	Video = fakeSearch("video")
+)
+
+func Google(query string) (results []Result) {
+</span></pre>
+
+<pre><span num="22">    c := make(chan Result)</span>
+<span num="23">    go func() { c &lt;- Web(query) } ()</span>
+<span num="24">    go func() { c &lt;- Image(query) } ()</span>
+<span num="25">    go func() { c &lt;- Video(query) } ()</span>
+<span num="26"></span>
+<span num="27">    timeout := time.After(80 * time.Millisecond)</span>
+<span num="28">    for i := 0; i &lt; 3; i++ {</span>
+<span num="29">        select {</span>
+<span num="30">        case result := &lt;-c:</span>
+<span num="31">            results = append(results, result)</span>
+<span num="32">        case &lt;-timeout:</span>
+<span num="33">            fmt.Println("timed out")</span>
+<span num="34">            return</span>
+<span num="35">        }</span>
+<span num="36">    }</span>
+<span num="37">    return</span>
+</pre>
+
+<pre style="display: none"><span>}
+
+func fakeSearch(kind string) Search {
+        return func(query string) Result {
+	          time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+	          return Result(fmt.Sprintf("%s result for %q\n", kind, query))
+        }
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	start := time.Now()
+	results := Google("golang")
+	elapsed := time.Since(start)
+	fmt.Println(results)
+	fmt.Println(elapsed)
+}
+
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Avoid timeout</h3>
+        
+  
+  <p>
+    Q: How do we avoid discarding results from slow servers?
+  </p>
+  
+
+  
+  <p>
+    A: Replicate the servers.  Send requests to multiple replicas, and use the first response.
+  </p>
+  
+
+  <div class="code">
+
+
+<pre><span num="15">func First(query string, replicas ...Search) Result {</span>
+<span num="16">    c := make(chan Result)</span>
+<span num="17">    searchReplica := func(i int) { c &lt;- replicas[i](query) }</span>
+<span num="18">    for i := range replicas {</span>
+<span num="19">        go searchReplica(i)</span>
+<span num="20">    }</span>
+<span num="21">    return &lt;-c</span>
+<span num="22">}</span>
+</pre>
+
+
+</div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Using the First function</h3>
+        
+  <div class="code playground">
+<pre style="display: none"><span>// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+type Result string
+type Search func(query string) Result
+
+// START1 OMIT
+func First(query string, replicas ...Search) Result {
+	c := make(chan Result)
+	searchReplica := func(i int) { c &lt;- replicas[i](query) }
+	for i := range replicas {
+		go searchReplica(i)
+	}
+	return &lt;-c
+}
+// STOP1 OMIT
+
+</span></pre>
+
+<pre><span num="26">func main() {</span>
+<span num="27">    rand.Seed(time.Now().UnixNano())</span>
+<span num="28">    start := time.Now()</span>
+<span num="29">    result := First("golang",</span>
+<span num="30">        fakeSearch("replica 1"),</span>
+<span num="31">        fakeSearch("replica 2"))</span>
+<span num="32">    elapsed := time.Since(start)</span>
+<span num="33">    fmt.Println(result)</span>
+<span num="34">    fmt.Println(elapsed)</span>
+<span num="35">}</span>
+</pre>
+
+<pre style="display: none"><span>
+func fakeSearch(kind string) Search {
+        return func(query string) Result {
+	          time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+	          return Result(fmt.Sprintf("%s result for %q\n", kind, query))
+        }
+}
+
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Google Search 3.0</h3>
+        
+  
+  <p>
+    Reduce tail latency using replicated search servers.
+  </p>
+  
+
+  <div class="code playground">
+<pre style="display: none"><span>
+
+// +build OMIT
+
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+type Result string
+type Search func(query string) Result
+
+var (
+	Web1 = fakeSearch("web1")
+        Web2 = fakeSearch("web2")
+	Image1 = fakeSearch("image1")
+	Image2 = fakeSearch("image2")
+	Video1 = fakeSearch("video1")
+	Video2 = fakeSearch("video2")
+)
+
+func Google(query string) (results []Result) {
+</span></pre>
+
+<pre><span num="27">    c := make(chan Result)</span>
+<span num="28">    go func() { c &lt;- First(query, Web1, Web2) } ()</span>
+<span num="29">    go func() { c &lt;- First(query, Image1, Image2) } ()</span>
+<span num="30">    go func() { c &lt;- First(query, Video1, Video2) } ()</span>
+<span num="31">    timeout := time.After(80 * time.Millisecond)</span>
+<span num="32">    for i := 0; i &lt; 3; i++ {</span>
+<span num="33">        select {</span>
+<span num="34">        case result := &lt;-c:</span>
+<span num="35">            results = append(results, result)</span>
+<span num="36">        case &lt;-timeout:</span>
+<span num="37">            fmt.Println("timed out")</span>
+<span num="38">            return</span>
+<span num="39">        }</span>
+<span num="40">    }</span>
+<span num="41">    return</span>
+</pre>
+
+<pre style="display: none"><span>}
+
+func First(query string, replicas ...Search) Result {
+	c := make(chan Result)
+	searchReplica := func(i int) {
+		c &lt;- replicas[i](query)
+	}
+	for i := range replicas {
+		go searchReplica(i)
+	}
+        return &lt;-c
+}
+
+func fakeSearch(kind string) Search {
+        return func(query string) Result {
+	          time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+	          return Result(fmt.Sprintf("%s result for %q\n", kind, query))
+        }
+}
+
+func main() {
+	rand.Seed(time.Now().UnixNano())
+	start := time.Now()
+	results := Google("golang")
+	elapsed := time.Since(start)
+	fmt.Println(results)
+	fmt.Println(elapsed)
+}
+</span></pre>
+</div><div class="buttons"><button class="run">Run</button></div><div class="ui-resizable output" style="display: none;"><div class="ui-resizable-handle ui-resizable-n" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-w" style="z-index: 90; display: block;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 90; display: block;"></div><div class="buttons"><button class="run">Run</button><button class="kill">Kill</button><button class="close">Close</button></div><pre></pre></div>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>And still…</h3>
+        
+  
+  <p>
+    No locks.  No condition variables.  No callbacks.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Summary</h3>
+        
+  
+  <p>
+    In just a few simple transformations we used Go's concurrency primitives to convert a
+  </p>
+  
+
+  <ul>
+  
+    <li>slow</li>
+  
+    <li>sequential</li>
+  
+    <li>failure-sensitive</li>
+  
+  </ul>
+
+  
+  <p>
+    program into one that is
+  </p>
+  
+
+  <ul>
+  
+    <li>fast</li>
+  
+    <li>concurrent</li>
+  
+    <li>replicated</li>
+  
+    <li>robust.</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>More party tricks</h3>
+        
+  
+  <p>
+    There are endless ways to use these tools, many presented elsewhere.
+  </p>
+  
+
+  
+  <p>
+    Chatroulette toy:
+  </p>
+  
+<p class="link"><a href="http://golang.org/s/chat-roulette" target="_blank">golang.org/s/chat-roulette</a></p>
+  
+  <p>
+    Load balancer:
+  </p>
+  
+<p class="link"><a href="http://golang.org/s/load-balancer" target="_blank">golang.org/s/load-balancer</a></p>
+  
+  <p>
+    Concurrent prime sieve:
+  </p>
+  
+<p class="link"><a href="http://golang.org/s/prime-sieve" target="_blank">golang.org/s/prime-sieve</a></p>
+  
+  <p>
+    Concurrent power series (by McIlroy):
+  </p>
+  
+<p class="link"><a href="http://golang.org/s/power-series" target="_blank">golang.org/s/power-series</a></p>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Don't overdo it</h3>
+        
+  
+  <p>
+    They're fun to play with, but don't overuse these ideas.
+  </p>
+  
+
+  
+  <p>
+    Goroutines and channels are big ideas. They're tools for program construction.
+  </p>
+  
+
+  
+  <p>
+    But sometimes all you need is a reference counter.
+  </p>
+  
+
+  
+  <p>
+    Go has "sync" and "sync/atomic" packages that provide mutexes, condition variables, etc. They provide tools for smaller problems.
+  </p>
+  
+
+  
+  <p>
+    Often, these things will work together to solve a bigger problem.
+  </p>
+  
+
+  
+  <p>
+    Always use the right tool for the job.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Conclusions</h3>
+        
+  
+  <p>
+    Goroutines and channels make it easy to express complex operations dealing with
+  </p>
+  
+
+  <ul>
+  
+    <li>multiple inputs</li>
+  
+    <li>multiple outputs</li>
+  
+    <li>timeouts</li>
+  
+    <li>failure</li>
+  
+  </ul>
+
+  
+  <p>
+    And they're fun to use.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Links</h3>
+        
+  
+  <p>
+    Go Home Page:
+  </p>
+  
+<p class="link"><a href="http://golang.org/" target="_blank">golang.org</a></p>
+  
+  <p>
+    Go Tour (learn Go in your browser)
+  </p>
+  
+<p class="link"><a href="http://tour.golang.org/" target="_blank">tour.golang.org</a></p>
+  
+  <p>
+    Package documentation:
+  </p>
+  
+<p class="link"><a href="http://golang.org/pkg" target="_blank">golang.org/pkg</a></p>
+  
+  <p>
+    Articles galore:
+  </p>
+  
+<p class="link"><a href="http://golang.org/doc" target="_blank">golang.org/doc</a></p>
+  
+  <p>
+    Concurrency is not parallelism:
+  </p>
+  
+<p class="link"><a href="http://golang.org/s/concurrency-is-not-parallelism" target="_blank">golang.org/s/concurrency-is-not-parallelism</a></p>
+      
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Rob Pike
+  </p>
+  
+
+  
+  <p>
+    Google
+  </p>
+  
+<p class="link"><a href="http://golang.org/s/plusrob" target="_blank">http://golang.org/s/plusrob</a></p><p class="link"><a href="http://twitter.com/rob_pike" target="_blank">@rob_pike</a></p><p class="link"><a href="http://golang.org/" target="_blank">http://golang.org</a></p>
+          </div>
+        
+      </article>
+
+    <div class="slide-area" id="prev-slide-area"></div><div class="slide-area" id="next-slide-area"></div></section>
+
+    <div id="help" style="display: none;">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+
+    
+    <script src="./Go Concurrency Patterns_files/play.js.descarga"></script>
+    
+
+    <script>
+      (function() {
+        
+        if (window["location"] && window["location"]["hostname"] == "talks.golang.org") {
+          var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+          ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";
+          var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+        }
+      })();
+    </script>
+  
+
+<link rel="stylesheet" type="text/css" href="./Go Concurrency Patterns_files/css"><link rel="stylesheet" type="text/css" href="./Go Concurrency Patterns_files/styles.css"></body></html>

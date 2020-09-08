@@ -1,0 +1,62 @@
+Backups
+-------
+Angular
+C:\GoogleCloudPlatform
+C:\GoogleCloudPlatform\Keys
+C:\GoogleCloudPlatform\Temp
+Lib
+LibExternos
+Proyectos
+Servina
+
+
+
+
+Linux Mint  (ExitosoWorld)
+
+sudo apt install neofetch  // para ver la configuracion y version instalada
+
+sudo apt update manager
+
+SNAP   https://www.reallinuxuser.com/how-to-use-snap-in-linux-mint/
+1) Open the command line tool via Ctrl + Alt + T.
+2) Type the command “sudo apt-get update” and give enter.
+3) Type the command “sudo apt-get install snapd” and give enter.
+
+sudo snap refresh” and all the Snap based applications on your system will be updated to the latest versions.
+
+
+
+en Firefox, install Chrome
+
+GDrive
+------
+https://www.youtube.com/watch?v=yJvn1zc6u0I&feature=youtu.be
+Abrir el explorador de archivos
+abrir Onlines Accounts/elegir Google/Elejir la cuenta
+
+
+OpenDrive
+---------
+sudo apt install snapd
+sudo snap install odrive-unofficial
+
+
+nginx-1.15.5
+
+Spotify  (mdberra	newdestino)
+
+Postman  (marcelo.berra@gmail.com	Newdestino2018)
+
+PuTTYgen
+
+PolarFlowSync
+
+TeamViewer
+
+Mysql
+Java
+Eclipse
+
+Golang
+VisualStudioCode

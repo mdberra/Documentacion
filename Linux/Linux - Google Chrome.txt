@@ -1,0 +1,17 @@
+Google Chrome
+
+. descargue e instale la clave del Repositorio de Google Linux.
+
+wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+
+. ejecute el comando siguiente para agregarlo al repositorio.
+
+sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+
+. Actualizar
+
+sudo apt-get update
+
+. Para instalar la versión estable
+
+sudo apt-get install google-chrome-stable

@@ -1,0 +1,27 @@
+0. Dispositivos/Insertar imagen CD de las Guest Aditions
+
+1. en virtualBox agregar los shared folders
+
+2. en linux
+
+crear un folder que sera el link
+   sudo mkdir /media/FolderNameLinux
+
+Montarlo
+   sudo mount -t vboxsf FolderNameWindows /media/FolderNameLinux
+
+Automontar cuando inicie la máquina virtual
+
+editar el archivo /etc/init.d/rc.local
+   gksudo gedit /etc/init.d/rc.local
+
+y agregar el sudo mount...
+
+
+para agregar que el usuario tenga permisos
+
+	sudo adduser marcelo vboxsf
+y luego reboot
+
+Books
+GoWork

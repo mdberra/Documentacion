@@ -1,0 +1,19 @@
+MYSQL
+-----
+sudo apt-get install mysql-server
+
+mysql -u root -p
+
+
+
+POSTGRESQL
+----------
+
+.  primero saber que version tenemos instalada de linux (ver el padre)
+   si es mint entonces el padre es ubuntu(derivado)
+
+ubuntu 16_04 es UBUNTU_CODENAME es xenial
+
+Create the file /etc/apt/sources.list.d/pgdg.list, and add a line for the repository
+
+   deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg  main

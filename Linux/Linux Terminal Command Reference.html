@@ -1,0 +1,197 @@
+<html>
+<body style="margin: 0 auto; padding: 0; background-color: #BCC7BD;">
+<div class="art-Sheet"  style="position:relative; z-index:0; margin:0 auto; width: 900px; min-width:23px; min-height:23px; font-weight: normal; font-style: normal; text-decoration: none; font-family: Arial, Helvetica, Sans-Serif;">
+	<hr>
+		<h2 style="font-size: 28px; color: #5B832F;">
+			<span>Linux Terminal Command Reference</span>
+		</h2>
+	<hr>
+
+<h3 style="font-size: 18px; color: #5B832F;">System Info</h3>
+<p>
+ <strong>date</strong> – Show the current date and time<br>
+ <strong>cal</strong> – Show this month's calendar<br>
+ <strong>uptime</strong> – Show current uptime<br>
+ <strong>w</strong> – Display who is online<br>
+ <strong>whoami</strong> – Who you are logged in as<br>
+ <strong>finger <em>user</em></strong> – Display information about <em><strong>user</strong></em><br>
+ <strong>uname -a</strong> – Show kernel information<br>
+ <strong>cat /proc/cpuinfo</strong> – CPU information<br>
+ <strong>cat /proc/meminfo</strong> – Memory information<br>
+ <strong>df</strong> <strong>-h</strong> – Show disk usage<br>
+ <strong>du</strong> – Show directory space usage<br>
+ <strong>free</strong> – Show memory and swap usage</p>
+
+<h3 style="font-size: 18px; color: #5B832F;">Keyboard Shortcuts</h3>
+<p>
+ <strong>Enter</strong> – Run the command<br>
+ <strong>Up Arrow</strong> – Show the previous command<br>
+ <strong>Ctrl + R</strong> – Allows you to type a part of the command you're looking for and finds it</p>
+<p>
+ <strong>Ctrl + Z</strong> – Stops the current command, resume with <strong>fg</strong> in the foreground or <strong>bg</strong> in the background<br>
+ <strong>Ctrl + C</strong> – Halts the current command, cancel the current operation and/or start with a fresh new line<br>
+ <strong>Ctrl + L</strong> – Clear the screen</p>
+<p>
+ <strong><em>command </em>| less </strong>– Allows the scrolling of the bash command window using <strong>Shift + Up Arrow</strong> and <strong>Shift + Down Arrow</strong><br>
+ <strong>!!</strong> – Repeats the last command<br>
+ <strong><em>command&nbsp;</em></strong> <strong>!$</strong> – Repeats the last argument of the previous command<br>
+ <strong>Esc + . (a period)</strong> – Insert the last argument of the previous command on the fly, which enables you to edit it before executing the command</p>
+<p>
+ <strong>Ctrl + A</strong> – Return to the start of the command you're typing<br>
+ <strong>Ctrl + E</strong> – Go to the end of the command you're typing<br>
+ <strong>Ctrl + U</strong> – Cut everything before the cursor to a special clipboard, erases the whole line<br>
+ <strong>Ctrl + K</strong> – Cut everything after the cursor to a special clipboard<br>
+ <strong>Ctrl + Y</strong> – Paste from the special clipboard that <strong>Ctrl + U</strong> and <strong>Ctrl + K</strong> save their data to<br>
+ <strong>Ctrl + T</strong> – Swap the two characters before the cursor (you can actually use this to transport a character from the left to the right, try it!)<br>
+ <strong>Ctrl + W</strong> – Delete the word / argument left of the cursor in the current line</p>
+<p>
+ <strong>Ctrl + D</strong> – Log out of current session, similar to <strong>exit</strong></p>
+
+<h3 style="font-size: 18px; color: #5B832F;">Learn the Commands</h3>
+<p>
+ <strong>apropos</strong><em><strong> subject</strong></em> – List manual pages for <strong><em>subject</em></strong><br>
+ <strong>man -k <em>keyword</em></strong> – Display man pages containing <em><strong>keyword</strong></em><br>
+ <strong>man <em>command</em></strong> – Show the manual for <strong><em>command</em></strong><br>
+ <strong>man -t <em>man</em> | ps2pdf - &gt; <em>man.pdf</em></strong>&nbsp; – Make a pdf of a manual page<br>
+ <strong>which </strong><em><strong>command</strong></em> – Show full path name of <strong><em>command</em></strong><br>
+ <strong>time <em>command</em></strong> – See how long a <strong><em>command</em></strong> takes</p>
+<p>
+ <strong>whereis <em>app</em></strong> – Show possible locations of <em><strong>app</strong></em><br>
+ <strong>which <em>app</em></strong> – Show which <em><strong>app</strong></em> will be run by default; it shows the full path</p>
+<h3 style="font-size: 18px; color: #5B832F;">Searching</h3>
+<p>
+ <strong>grep <em>pattern</em> <em>files</em></strong> – Search for <em><strong>pattern</strong></em> in <em><strong>files</strong></em><br>
+ <strong>grep -r <em>pattern</em> <em>dir</em></strong> – Search recursively for <strong><em>pattern</em></strong> in <em><strong>dir</strong></em><br>
+ <em><strong>command | </strong></em><strong>grep</strong><em><strong> pattern</strong></em> – Search for <em><strong>pattern</strong></em> in the output of <em><strong>command</strong></em><br>
+ <strong>locate <em>file</em></strong> – Find all instances of <em><strong>file</strong></em><br>
+ <strong>find / -name <em>filename</em></strong> – Starting with the root directory, look for the file called <em><strong>filename</strong></em><br>
+ <strong>find / -name ”*<em>filename</em>*”</strong> – Starting with the root directory, look for the file containing the string <em><strong>filename</strong></em><br>
+ <strong>locate <em>filename</em></strong> – Find a file called <em><strong>filename</strong></em> using the locate command; this assumes you have already used the command <strong>updatedb</strong> (see next)<br>
+ <strong>updatedb</strong> – Create or update the database of files on all file systems attached to the Linux root directory<br>
+ <strong>which <em>filename</em></strong> – Show the subdirectory containing the executable file&nbsp; called <em><strong>filename</strong></em><br>
+ <strong>grep <em>TextStringToFind</em> /<em>dir</em></strong> – Starting with the directory called <em><strong>dir</strong></em>, look for and list all files containing <em><strong>TextStringToFind</strong></em></p>
+<h3 style="font-size: 18px; color: #5B832F;">File Permissions</h3>
+<p>
+ <strong>chmod <em>octal</em> <em>file</em></strong> – Change the permissions of <em><strong>file</strong></em> to <em><strong>octal</strong></em>, which can be found separately for user, group, and world by adding: 4 – read (r), 2 – write (w), 1 – execute (x)<br>
+ Examples:<br>
+ <strong>chmod 777</strong> – read, write, execute for all<br>
+ <strong>chmod 755</strong> – rwx for owner, rx for group and world<br>
+ For more options, see <strong>man chmod</strong>.</p>
+<h3 style="font-size: 18px; color: #5B832F;">File Commands</h3>
+<p>
+ <strong>ls</strong> – Directory listing<br>
+ <strong>ls -l</strong> – List files in current directory using long format<br>
+ <strong>ls -laC</strong> – List all files in current directory in long format and display in columns<br>
+ <strong>ls -F</strong> – List files in current directory and indicate the file type<br>
+ <strong>ls -al</strong> – Formatted listing with hidden files</p>
+<p>
+ <strong>cd <em>dir</em></strong> – Change directory to <em><strong>dir</strong></em><br>
+ <strong>cd</strong> – Change to home<br>
+ <strong>mkdir</strong><em><strong> dir</strong></em> – Create a directory <em><strong>dir</strong></em><br>
+ <strong>pwd</strong> – Show current directory</p>
+<p>
+ <strong>rm <em>name</em></strong> – Remove a file or directory called <em><strong>name</strong></em><br>
+ <strong>rm</strong><em><strong> -r dir</strong></em> – Delete directory <em><strong>dir</strong></em><br>
+ <strong>rm -f <em>file</em></strong> – Force remove <em><strong>file</strong></em><br>
+ <strong>rm -rf <em>dir</em></strong> – Force remove an entire directory <em><strong>dir </strong></em>and all it’s included files and subdirectories (use with extreme caution)</p>
+<p>
+ <strong>cp <em>file1 file2</em></strong> – Copy <em><strong>file1</strong></em> to <em><strong>file2</strong></em><br>
+ <strong>cp -r <em>dir1 dir2</em></strong> – Copy <em><strong>dir1</strong></em> to <em><strong>dir2</strong></em>; create <em><strong>dir2</strong></em> if it doesn't exist<br>
+ <strong>cp <em>file</em> /home/<em>dirname</em></strong> – Copy the filename called <em><strong>file</strong></em> to the <strong>/home/dirname</strong> directory</p>
+<p>
+ <strong>mv <em>file</em> /home/<em>dirname</em></strong> – Move the <em><strong>file</strong></em> called filename to the <em><strong>/home/dirname</strong></em> directory<br>
+ <strong>mv</strong><em><strong> file1 file2</strong></em> – Rename or move <em><strong>file1</strong></em> to <em><strong>file2</strong></em>; if <em><strong>file2</strong></em> is an existing directory, moves <em><strong>file1</strong></em> into directory <em><strong>file2</strong></em></p>
+<p>
+ <strong>ln -s <em>file link</em></strong> – Create symbolic link <em><strong>link</strong></em> to <strong><em>file</em></strong><br>
+ <strong>touch <em>file</em></strong> – Create or update <em><strong>file</strong></em><br>
+ <strong>cat &gt; <em>file</em></strong> – Places standard input into <em><strong>file</strong></em><br>
+ <strong>cat <em>file</em></strong> – Display the file called <em><strong>file</strong></em></p>
+<p>
+ <strong>more <em>file</em></strong> – Display the file called <strong><em>file</em></strong> one page at a time, proceed to next page using the spacebar<br>
+ <strong>head <em>file</em></strong> – Output the first 10 lines of <em><strong>file</strong></em><br>
+ <strong>head -20 <em>file</em></strong> – Display the first 20 lines of the file called <em><strong>file</strong></em><br>
+ <strong>tail <em>file</em></strong> – Output the last 10 lines of <strong><em>file</em></strong><br>
+ <strong>tail -20 <em>file</em></strong> – Display the last 20 lines of the file called <em><strong>file</strong></em><br>
+ <strong>tail -f <em>file</em></strong> – Output the contents of <em><strong>file</strong></em> as it grows, starting with the last 10 lines</p>
+<h3 style="font-size: 18px; color: #5B832F;">Compression</h3>
+<p>
+ <strong>tar cf <em>file.tar files</em></strong><em> </em>– Create a tar named <em><strong>file.tar</strong></em> containing <em><strong>files</strong></em><br>
+ <em><strong>tar xf file.tar</strong></em> – Extract the files from <em><strong>file.tar</strong></em></p>
+<p>
+ <strong>tar czf <em>file.tar.gz files</em></strong> – Create a tar with Gzip compression<br>
+ <strong>tar xzf <em>file.tar.gz</em> </strong>– Extract a tar using Gzip</p>
+<p>
+ <em><strong>tar cjf file.tar.bz2</strong></em> – Create a tar with Bzip2 compression<br>
+ <strong>tar xjf <em>file.tar.bz2</em></strong> – Extract a tar using Bzip2</p>
+<p>
+ <strong>gzip <em>file</em></strong> – Compresses <strong><em>file</em></strong> and renames it to <strong><em>file.gz</em></strong><br>
+ <strong>gzip -d <em>file.gz</em></strong> – Decompresses <strong><em>file.gz</em></strong> back to <strong><em>file</em></strong></p>
+
+<h3 style="font-size: 18px; color: #5B832F;">Printing</h3>
+<p>
+ <strong>/etc/rc.d/init.d/lpd start</strong> – Start the print daemon<br>
+ <strong>/etc/rc.d/init.d/lpd stop</strong> – Stop the print daemon<br>
+ <strong>/etc/rc.d/init.d/lpd status</strong> – Display status of the print daemon<br>
+ <strong>lpq</strong> – Display jobs in print queue<br>
+ <strong>lprm</strong> – Remove jobs from queue<br>
+ <strong>lpr</strong> – Print a file<br>
+ <strong>lpc</strong> – Printer control tool<br>
+ <strong>man <em>subject</em> | lpr</strong> – Print the manual page called <strong><em>subject</em></strong> as plain text<br>
+ <strong>man -t <em>subject</em> | lpr</strong> – Print the manual page called <strong><em>subject</em></strong> as Postscript output<br>
+ <strong>printtool</strong> – Start X printer setup interface</p>
+
+<h3 style="font-size: 18px; color: #5B832F;">Network</h3>
+<p>
+ <strong>ifconfig</strong> – List IP addresses for all devices on the local machine<br>
+ <strong>iwconfig</strong> – Used to set the parameters of the network interface which are specific to the wireless operation (for example: the frequency)<br>
+ <strong>iwlist</strong> – used to display some additional information from a wireless network interface that is not displayed by <strong>iwconfig</strong><br>
+ <strong>ping</strong><em><strong> host</strong></em> – Ping <strong><em>host</em></strong> and output results<br>
+ <strong>whois <em>domain</em></strong> – Get whois information for <em><strong>domain</strong></em><br>
+ <strong>dig <em>domain</em></strong> – Get DNS information for <em><strong>domain</strong></em><br>
+ <strong>dig -x</strong><em><strong> host</strong></em> – Reverse lookup <em><strong>host</strong></em><br>
+ <strong>wget <em>file</em></strong> – Download <em><strong>file</strong></em><br>
+ <strong>wget -c</strong><em><strong> file</strong></em> – Continue a stopped download</p>
+
+<h3 style="font-size: 18px; color: #5B832F;">SSH</h3>
+<p>
+ <strong>ssh <em>user</em>@<em>host</em></strong> – Connect to <strong><em>host</em></strong> as <em><strong>user</strong></em><br>
+ <strong>ssh -p <em>port user</em>@<em>host</em></strong> – Connect to <em><strong>host</strong></em> on port <em><strong>port</strong></em> as <em><strong>user</strong></em><br>
+ <strong>ssh-copy-id <em>user</em>@<em>host</em></strong> – Add your key to <em><strong>host</strong></em> for <em><strong>user</strong></em> to enable a keyed or passwordless login</p>
+
+<h3 style="font-size: 18px; color: #5B832F;">User Administration</h3>
+<p>
+ <strong>adduser </strong><em><strong>accountname</strong></em> – Create a new user call <em><strong>accountname</strong></em><br>
+ <strong>passwd <em>accountname</em></strong> – Give <em><strong>accountname</strong></em> a new password<br>
+ <strong>su</strong> – Log in as superuser from current login<br>
+ <strong>exit</strong> – Stop being superuser and revert to normal user</p>
+
+<h3 style="font-size: 18px; color: #5B832F;">Process Management</h3>
+<p>
+ <strong>ps</strong> – Display your currently active processes<br>
+ <strong>top</strong> – Display all running processes<br>
+ <strong>kill <em>pid</em></strong> – Kill process id <em><strong>pid</strong></em><br>
+ <strong>killall <em>proc</em></strong> – Kill all processes named <em><strong>proc</strong></em> (use with extreme caution)<br>
+ <strong>bg</strong> – Lists stopped or background jobs; resume a stopped job in the background<br>
+ <strong>fg</strong> – Brings the most recent job to foreground<br>
+ <strong>fg</strong><em><strong> n</strong></em> – Brings job <em><strong>n</strong></em> to the foreground</p>
+
+ <h3 style="font-size: 18px; color: #5B832F;">Installation from source</h3>
+<p>
+ <strong>./configure</strong><br>
+ <strong>make</strong><br>
+ <strong>make install</strong><br>
+ <strong>dpkg -i</strong><em><strong> pkg.deb</strong></em> – install a DEB package (Debian / Ubuntu / Linux Mint)<br>
+ <strong>rpm -Uvh <em>pkg.rpm</em></strong> – install a RPM package (Red Hat / Fedora)</p>
+
+<h3 style="font-size: 18px; color: #5B832F;">Stopping &amp; Starting</h3>
+<p>
+ <strong>shutdown -h now</strong> – Shutdown the system now and do not reboot<br>
+ <strong>halt</strong> – Stop all processes - same as above<br>
+ <strong>shutdown -r 5</strong> – Shutdown the system in 5 minutes and reboot<br>
+ <strong>shutdown -r now</strong> – Shutdown the system now and reboot<br>
+ <strong>reboot</strong> – Stop all processes and then reboot - same as above<br>
+ <strong>startx</strong> – Start the X system</p>
+
+</div>
+</body>
+</html>

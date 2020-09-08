@@ -1,0 +1,126 @@
+Un proyecto es un abstraccion, forma de engrupar los diferentes productos de Gcloud
+Podemos tener hasta 5 proyectos por cuenta
+En cada proyecto podemos tener redes (Virtuales)
+Una red puede estar expandida en varias regiones en forma de subredes
+
+
+gcloud projects list
+
+en VPC networks aparacen las regiones con sus redes.
+La default tiene 18 subnets con 4 Firewall Rules
+		
+en Zones se encuentran las zonas que son diferentes ubicaciones fisicas de la region
+
+europe-west-1  es Belgica
+europe-west-2  es londres  y tiene 3 zonas A, B, C que son diferentes puntos geograficos en Londres
+
+America tiene 4 regiones y cada una tiene zonas
+GCloud nos garantiza por lo menos 2 zonas dentro de cada region para tener disponibilidad minima
+
+Dentro del proyecto podemos tener redes clouds(virtuales)
+Una red puede estar expandida en diferentes zonas/regiones
+La red esta expandida en diferentes subredes
+
+
+SUBRED 
+https://www.youtube.com/watch?v=3ioh96OWolI
+
+crear una SubRed
+. Custom
+  . se le pone nombre y se asocia a una region
+  . se pone un rango de IP  192.168.10.0/24
+  . PrivateGoogleAccess (Enabled es para que las maq puedan acceder a las herramientas/APIS/Internet)
+. Automatic: puede ser convertida a Custom
+  . se asignan directamente ips en diferentes regiones
+
+EXTERNAL IP ADDRESSes
+Direcciones IP
+
+Cuando tenemos una virtualMachine tiene una IP interna y otra externa
+Interna: es solo alcanzable dentro de la SubNet
+Externa: nunca va a estar visible dentro de la propia SubNet
+. es una IP public de los rangos de google cloud que va a estar mapeada a su IP privada.  El trafico que llega a la IP Publica es reenviada a la IP privada.  La maquina virtual NO ve la IP Publica
+
+Las IP publicas son efimeras. Cuando levantamos la maq puede haber cambiado la publicIP.  Entonces para evitar eso existen la External Ip Addresses.
+En esta opcion se puede reservar una StaticIpAddress
+.Name: Ip-Test
+. Ipv4/Ipv6 --> Ipv4
+.Ambito de la Ip, Regional/Global --> Regional donde se elegie la region
+. Attached NO
+
+Si no la usamos la van a cobrar. Con lo cual hay que mapearla a un dominio (Attached)
+
+
+Firewall Rules
+
+eliminar el default-allow-rdp para el protocolo de gestion remota de Microsoft
+
+
+Cloud DNS
+
+Se puede crear una zona de DNS
+RecordSet  asocia un DNS Name a una IPv4Address
+
+
+INSTANCIAS - Compute Engine
+https://www.youtube.com/watch?v=fDLrCWNYIuE&t=240s
+
+La IP Externa fue apuntada a un dominio
+
+Instance Templates: Se pueden crear grupos de instancias
+Discos: crear para attachear  generalmente ya esta implicito
+Snapshots: Para luego poder rescatar datos
+Images: Para levantar instancias
+
+Para crear una Instancia
+. Nombre: 
+. Zona: elegir  us-
+. Machine: 1 cpu
+. BootDisk: elegir la imagen que queremos,  podemos usar una CustomImage o Snapshot  (CENTOS)
+. Identity and API access-Service Account: dejamos el default
+. Firewall: entrar en management
+  . Descripcion:
+  . Labels:
+  . Automatizar: colocar un script para que se ejecute la primera vez
+    . #!/bin/bash
+    . apt-get update
+    . apt-get install apache2 -y (instalacion desatendida)
+  . metadata: variables que pueden ser recogidas desde nuestra aplicacion (Key,Value)
+  . Reglas,  en Firewall Rules se crean reglas (video anterior)
+    . se aplican a travez de los tags
+    . creamos una nueva Rule
+      . Create a firewall Rule
+        . Name: allow-http
+        . Network: en nuestra red (se aplican a una red)
+        . Priority: dejamos el default
+        . Target Tags: colocamos un tag para que luego podamos invocarlo desde las Compute Engine
+                     : server-http
+        . Source filer: IP ranges  es desde todo el mundo
+        . Source IP ranges: 0.0.0.0/0
+        . Protocols and Ports 
+          . Specified protocols and ports: tcp:80
+
+        . otra regla: Permitir ssh desde cualquier sitio
+                      Name: allow-ssh  Tag: server-ssh   ip-ranges: 0.0.0.0/0  Protocols and ports: tcp:22
+  . En la instance, en Firewall
+    . en Networking, colocamos en Network tags: server-ssh y server-http (que fue un tag que creamos en Firewall rules)
+. Automation: se puede poner un script que se ejecuta solo la primera vez que se instancia
+creamos la instancia
+
+accedemos por SSH 
+. hay un boton SSH, se abre una ventana del browser con la coneccion
+. sudo su           te pones como root
+. ps aux            para ver que procesos estan corriendo
+. ps aux | grep apa para ve si el proceso apache esta corriendo
+. curl localhost    hace una peticion a localhost
+. cd /var/www/html
+. nano index.html   editor
+
+Desde mi PC 
+. tomando la External IP
+. desde una consola  ssh 35.189.127.97 (external IP)
+                     curl 35.189.127.97
+asignar IP estatica
+
+
+https://www.youtube.com/watch?v=fDLrCWNYIuE

@@ -1,0 +1,34 @@
+1. Download the archive and extract it into /usr/local,
+  creating a Go tree in /usr/local/go. For example:
+
+tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz
+                       go1.2.1.linux-amd64.tar.gz
+
+(Typically these commands must be run as root or through sudo.)
+
+Add /usr/local/go/bin to the PATH environment variable.
+export PATH=$PATH:/usr/local/go/bin
+
+You can do this by adding this line to your /etc/profile (for a system-wide installation) or $HOME/.profile:
+
+The Go binary distributions assume they will be installed in /usr/local/go
+
+
+2. https://www.jetbrains.com/help/go/installing-and-launching-goland.html
+
+tar xfz goland-2017.3.tar.gz <new_archive_folder>
+
+The recommended installation location is /opt. To install GoLand into this directory, enter the following command:
+
+sudo tar xfz goland-2017.3.tar.gz -C /opt/
+
+A new instance must not be extracted over the existing one. The target folder must be empty.
+
+For example,
+cd /opt/goland-2017.3/bin
+./goland.sh
+
+in desktop,  create a New Launcher here...   where in the command set:
+
+/opt/GoLand-2017.3.2/bin/./goland.sh
+

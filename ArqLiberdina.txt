@@ -1,0 +1,63 @@
+LiberdinaT
+----------
+
+ACCESOS DIRECTOS
+
+. mysql --host=35.193.110.100 --user=liberdinaroot --password
+. ssh -i 
+
+COMPUTE ENGINE
+. Instance                 liberdina-virtualbank
+. InternalIP               10.128.0.2
+. ExternalIP               35.202.224.183 static liberdina-ip-ce
+. PublicKey                liberdinat
+WebServer
+. NGINX
+  . cd /usr/share/nginx/html
+  . sudo chmod -R 777 html
+
+RestApi
+. cd /home/liberdina
+  . Ping
+  . ServerServina
+
+---------------------------------------------------------------------------------------
+CLOUD SQL
+. Instante                 mysql-liberdinat
+. ExternalIP               35.193.110.100
+. InstanceConnectionName   silken-vial-220421:us-central1:mysql-liberdinat
+. user                     liberdinaroot
+. password                 Newdestino2018
+
+
+---------------------------------------------------------------------------------------
+Putty/WinSCP
+------------
+colocar nombre en minuscula: liberdinat
+colocar clave en minuscula: newdestino2018
+la privada se guarda para el winscp
+la publica se coloca en la VM instaces
+
+
+KILL
+----
+[liberdinat@liberdina-virtualbank liberdina]$ ps -ef |grep server
+liberdi+  1135  1133  0 20:44 ?        00:00:00 /usr/libexec/openssh/sftp-server
+liberdi+  1280  1277  0 20:53 ?        00:00:00 /usr/libexec/openssh/sftp-server
+liberdi+  1363  1362  0 20:59 ?        00:00:00 /usr/libexec/openssh/sftp-server
+liberdi+  1504  1134  0 21:09 pts/0    00:00:00 grep --color=auto server
+[liberdinat@liberdina-virtualbank liberdina]$ kill -9 1135
+[liberdinat@liberdina-virtualbank liberdina]$ kill -9 1280
+[liberdinat@liberdina-virtualbank liberdina]$ kill -9 1363
+[liberdinat@liberdina-virtualbank liberdina]$ ps -ef |grep server
+liberdi+  1569  1134  0 21:09 pts/0    00:00:00 grep --color=auto server
+
+
+
+
+http://localhost:5000/api/pepeya/contacto/{idContacto:[0-9]+} GET
+http://localhost:5000/api/pepeya/contactos GET
+http://localhost:5000/api/pepeya/contactoDni/{dni:[0-9]+}"  GET
+http://localhost:5000/api/pepeya/contacto POST
+http://localhost:5000/api/pepeya/contacto PUT
+http://localhost:5000/api/pepeya/contacto/{dni:[0-9]+} DELETE

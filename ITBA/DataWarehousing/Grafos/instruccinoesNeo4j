@@ -1,0 +1,35 @@
+Respecto de la  clase dedicada a Neo4J, tener en cuenta que:
+
+
+1) Bajar Neo4j COMMUNITY server de  https://neo4j.com/download-center/#releases 
+2) Descompactarlo en cualquier directorio. Notar que  Neo4J necesita tener   Java 1.8 instalado.  
+3) El archivo grafos.zip en campus contiene  las 2 bases de datos de grafos usadas en clase. 
+Descompactarlas en el directorio "..\databases\data"
+Es decir, la estructura debería ser:
+
+neo4j-community-3.5.6\data\databases\telco.db ...  etc
+
+4) En la carpeta
+ 
+neo4j-community-3.5.6\conf  reemplazar el archivo neo4j.conf por el provisto en campus.
+ 
+ 
+5) Arrancar el servidor. Para ello, abrir una terminal (con c:\cmd), ir a la carpeta neo4j-community-3.5.6\bin
+y tipear "neo4j console"
+
+6) Abrir un bowser y escribir la URL: localhost:7474. Se abrirá la interfaz gráfica donde escribir las consultas en Cypher. 
+Inicialmente está habilitada la base web.db.
+
+7) Para trabajar con telco.db, cerrar el servidor (ctrl-c en la ventana de cmd), abrir el archivo neo4j.conf.
+Verán que hay dos líneas de la forma:
+...
+#dbms.active_database=web.db
+dbms.active_database=telco.db
+...
+
+Desmarcar web.db y marcar telco.db. Debe quedar:
+
+dbms.active_database=web.db
+#dbms.active_database=telco.db
+
+Arrancar nuevamente el server, como se indicó en 5)

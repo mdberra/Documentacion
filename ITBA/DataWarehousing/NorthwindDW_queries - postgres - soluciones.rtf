@@ -1,0 +1,424 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033\deflangfe1033{\fonttbl{\f0\fmodern\fprq1\fcharset0 Courier New;}}
+{\colortbl ;\red0\green176\blue80;}
+{\*\generator Riched20 10.0.14393}{\*\mmathPr\mnaryLim0\mdispDef1\mwrapIndent1440 }\viewkind4\uc1 
+\pard\nowidctlpar\b\f0\fs22 Query 6.1. \cf1\b0 Total sales amount per customer, year, and product category.\cf0\par
+\par
+SELECT C.CompanyName, T.Year, A.CategoryName,\par
+SUM(SalesAmount)AS SalesAmount\par
+FROM Sales S, Customer C, Time T, Product P, Category A\par
+WHERE S.CustomerKey = C.CustomerKey AND\par
+S.OrderDateKey = T.TimeKey AND\par
+S.ProductKey = P.ProductKey AND P.CategoryKey = A.CategoryKey\par
+GROUP BY C.CompanyName, T.Year, A.CategoryName\par
+\par
+\b Query 6.2. \b0 Yearly sales amount for each pair of customer country \cf1 and supplier countries.\par
+\cf0\par
+SELECT CO.CountryName AS CustomerCountry,\par
+SO.CountryName AS SupplierCountry, T.Year,\par
+SUM(SalesAmount)AS SalesAmount\par
+FROM Sales F, Customer C, City CC, State CS, Country CO,\par
+Supplier S, City SC, State SS, Country SO, Time T\par
+WHERE F.CustomerKey = C.CustomerKey AND C.CityKey = CC.CityKey AND\par
+CC.StateKey = CS.StateKey AND CS.CountryKey = CO.CountryKey AND\par
+F.SupplierKey = S.SupplierKey AND S.CityKey = SC.CityKey AND\par
+SC.StateKey = SS.StateKey AND SS.CountryKey = SO.CountryKey AND \par
+F.OrderDateKey = T.TimeKey\par
+GROUP BY CO.CountryName, SO.CountryName, T.Year\par
+ORDER BY CO.CountryName, SO.CountryName, T.Year\par
+\par
+CUSTOMER COUNTRY | SUPPLIER COUNTRY | YEAR\par
+"Argentina";"Australia";1997;371.0000\par
+"Argentina";"Australia";1998;104.7000\par
+"Argentina";"Belgium";1998;322.0000\par
+"Argentina";"Canada";1997;285.0000\par
+"Argentina";"Finland";1998;180.0000\par
+\par
+\par
+\b Query 6.3. \cf1\b0 Monthly sales by customer state compared to those of the previous year.\par
+\cf0\par
+WITH MonthlySalesState AS (\par
+SELECT S.StateName, T.MonthNumber, T.Year,\par
+SUM(SalesAmount) AS SalesAmount\par
+FROM Sales F, Customer C, City Y, State S, Time T\par
+WHERE F.CustomerKey = C.CustomerKey AND\par
+C.CityKey = Y.CityKey AND\par
+Y.StateKey = S.StateKey AND\par
+F.OrderDateKey = T.TimeKey\par
+GROUP BY S.StateName, T.Year, T.MonthNumber )\par
+SELECT M1.StateName,\par
+to_char(to_timestamp(to_char((M1.MonthNumber),'999'),'MM'),'Mon') || ' ' || CAST(M1.Year  AS CHAR(4)) \par
+AS Month,\par
+M1.SalesAmount,\par
+M2.SalesAmount AS PreviousYear\par
+FROM MonthlySalesState M1 LEFT OUTER JOIN\par
+MonthlySalesState M2 ON M1.StateName = M2.StateName\par
+AND M1.MonthNumber = M2.MonthNumber AND\par
+M1.Year-1 = M2.Year\par
+ORDER BY M1.StateName, Month\par
+\par
+CUSTOMER STATE | MONTH | SALES |  PREVIOUS YEAR SALES\par
+"Alaska";"Apr 1998";539.4000;\par
+"Alaska";"Feb 1997";1754.9999;\par
+"Alaska";"Jan 1998";3638.8876;\par
+"Alaska";"Jul 1997";565.5000;\par
+"Alaska";"Mar 1998";848.0000;\par
+"Alaska";"Oct 1996";934.5000;\par
+"Alaska";"Oct 1997";1893.0000;934.5000\par
+"Alaska";"Sep 1996";3741.3000;\par
+"Alaska";"Sep 1997";1261.8750;3741.3000\par
+"\'c5rhus";"Apr 1998";940.5000;\par
+"\'c5rhus";"Dec 1996";1765.6000;\par
+"\'c5rhus";"Dec 1997";1684.2750;1765.6000\par
+"\'c5rhus";"Jul 1997";861.2500;\par
+"\'c5rhus";"Mar 1997";2517.9999;\par
+"\'c5rhus";"Mar 1998";3343.5000;2517.9999\par
+"\'c5rhus";"Nov 1996";834.2000;\par
+"\'c5rhus";"Nov 1997";736.0000;834.2000\par
+\par
+\par
+\b Query 6.4. \cf1\b0 Monthly sales growth per product, that is, total sales per product compared to those of the previous month.\par
+\cf0\par
+WITH MonthlySalesProd AS (\par
+SELECT P.ProductName, T.MonthNumber AS Month, T.Year,\par
+SUM(SalesAmount) AS SalesAmount\par
+FROM Sales S, Product P, Category C, Time T\par
+WHERE S.ProductKey = P.ProductKey AND\par
+P.CategoryKey = C.CategoryKey AND\par
+S.OrderDateKey = T.TimeKey\par
+GROUP BY P.ProductName, T.Year, T.MonthNumber ),\par
+MonthlySalesProdComp AS (\par
+SELECT M1.ProductName,\par
+to_char(to_timestamp(to_char((M1.Month),'999'),'MM'),'Mon') || ' ' || CAST(M1.Year  AS CHAR(4))  AS Month,\par
+M1.SalesAmount, M2.SalesAmount AS PreviousMonth\par
+FROM MonthlySalesProd M1 LEFT OUTER JOIN\par
+MonthlySalesProd M2 ON\par
+M1.ProductName = M2.ProductName AND\par
+M1.Month-1 = M2.Month AND M1.Year = M2.Year\par
+WHERE M1.Month > 1\par
+UNION\par
+SELECT M1.ProductName,\par
+to_char(to_timestamp(to_char((M1.Month),'999'),'MM'),'Mon') || ' ' || CAST(M1.Year  AS CHAR(4))  AS Month,\par
+M1.SalesAmount, M2.SalesAmount AS PreviousMonth\par
+FROM MonthlySalesProd M1 LEFT OUTER JOIN\par
+MonthlySalesProd M2 ON\par
+M1.ProductName = M2.ProductName AND\par
+M1.Month+11 = M2.Month AND M1.Year-1 = M2.Year\par
+WHERE M1.Month=1 )\par
+SELECT ProductName, Month,\par
+SalesAmount AS SalesAmount,\par
+PreviousMonth AS PreviousMonth,\par
+(SalesAmount - PreviousMonth) AS SalesGrowth\par
+FROM MonthlySalesProdComp\par
+ORDER BY ProductName, Month\par
+\par
+PRODUCT | MONTH | SALES | PREVIOUS MONTH SALES\par
+"Alice Mutton";"Aug 1996";819.0000;936.0000;-117.0000\par
+"Alice Mutton";"Dec 1997";3480.7500;741.0000;2739.7500\par
+"Alice Mutton";"Feb 1997";312.0000;2355.6002;-2043.6002\par
+"Alice Mutton";"Feb 1998";2035.8000;1872.0000;163.8000\par
+"Alice Mutton";"Jan 1997";2355.6002;;\par
+"Alice Mutton";"Jan 1998";1872.0000;3480.7500;-1608.7500\par
+"Alice Mutton";"Jul 1996";936.0000;;\par
+"Alice Mutton";"Jul 1997";3900.0000;1294.8000;2605.2000\par
+\par
+\b Query 6.5. \cf1\b0 Three best-selling employees and their sales.\par
+\cf0\par
+SELECT   E.FirstName || E.LastName AS EmployeeName,\par
+SUM(S.SalesAmount) AS SalesAmount\par
+FROM Sales S, Employee E\par
+WHERE S.EmployeeKey = E.EmployeeKey\par
+GROUP BY E.FirstName, E.LastName\par
+ORDER BY SUM(S.SalesAmount) DESC\par
+LIMIT 3\par
+\par
+"MargaretPeacock";224397.2965\par
+"JanetLeverling";186197.7978\par
+"NancyDavolio";184758.3839\par
+\par
+\par
+\b Query 6.6.\cf1  \b0 Best-selling employee per product and year.\par
+\cf0\par
+WITH SalesProdYearEmp AS (\par
+SELECT P.ProductName, T.Year,\par
+SUM(S.SalesAmount) AS SalesAmount,\par
+E.FirstName || E.LastName AS EmployeeName\par
+FROM Sales S, Employee E, Time T, Product P\par
+WHERE S.EmployeeKey = E.EmployeeKey AND\par
+S.OrderDateKey = T.TimeKey AND\par
+S.ProductKey = P.ProductKey\par
+GROUP BY P.ProductName, T.Year, E.FirstName, E.LastName )\par
+SELECT ProductName, Year,\par
+SalesAmount AS TopSales,\par
+EmployeeName AS TopEmployee\par
+FROM SalesProdYearEmp S1\par
+WHERE S1.SalesAmount = (\par
+SELECT MAX(SalesAmount)\par
+FROM SalesProdYearEmp S2\par
+WHERE S1.ProductName = S2.ProductName AND\par
+S1.Year = S2.Year )\par
+\par
+PROCUCT| YEAR | SALES OF TOP EMPLOYEE | TOP EMPLOYEE \par
+"Gorgonzola Telino";1996;1240.0000;"MichaelSuyama"\par
+"Inlagd Sill";1996;790.4000;"MargaretPeacock"\par
+"Konbu";1998;850.2000;"MargaretPeacock"\par
+"Ikura";1997;3732.4000;"NancyDavolio"\par
+"Chef Anton's Cajun Seasoning";1996;1038.4000;"MargaretPeacock"\par
+"Valkoinen suklaa";1998;390.0000;"MargaretPeacock"\par
+\par
+\par
+\b Query 6.7. \cf1\b0 Countries that account for top 50% of the sales amount.\par
+\cf0\par
+WITH SalesCountry AS (\par
+SELECT CountryName, SUM(SalesAmount) AS SalesAmount\par
+FROM Sales S, Customer C, City Y, State T, Country O\par
+WHERE S.CustomerKey = C.CustomerKey AND\par
+C.CityKey = Y.CityKey AND Y.StateKey = T.StateKey AND\par
+T.CountryKey = O.CountryKey\par
+GROUP BY CountryName ),\par
+CumSalesCountry AS (\par
+SELECT S.*, SUM(SalesAmount) OVER (ORDER BY\par
+SalesAmount DESC ROWS UNBOUNDED PRECEDING)\par
+AS CumSalesAmount\par
+FROM SalesCountry S )\par
+SELECT 'All Customers' AS CountryName,\par
+SUM(SalesAmount) AS SalesAmount\par
+FROM SalesCountry\par
+UNION\par
+SELECT CountryName,\par
+SalesAmount AS SalesAmount\par
+FROM CumSalesCountry\par
+WHERE CumSalesAmount <=\par
+(SELECT MIN(CumSalesAmount) FROM CumSalesCountry\par
+WHERE CumSalesAmount >=\par
+(SELECT 0.5 * SUM(SalesAmount) FROM SalesCountry) ) \par
+\par
+COUNTRY | SALES AMOUNT \par
+"Germany";227796.6585\par
+"Brazil";103060.6964\par
+"United States";243618.8898\par
+"Austria";118104.9385\par
+"All Customers";1189875.7038\par
+\par
+\par
+\b Query 6.8. \cf1\b0 Total sales and average monthly sales by employee and year.\par
+\cf0\par
+WITH MonthlySalesEmp AS (\par
+SELECT E.FirstName || E.LastName AS EmployeeName,\par
+T.Year, T.MonthNumber,\par
+SUM(SalesAmount) AS SalesAmount\par
+FROM Sales S, Employee E, Time T\par
+WHERE S.EmployeeKey = E.EmployeeKey AND\par
+S.OrderDateKey = T.TimeKey\par
+GROUP BY E.FirstName, E.LastName, T.Year, T.MonthNumber )\par
+SELECT EmployeeName, Year,\par
+SUM(SalesAmount) AS SalesAmount,\par
+AVG(SalesAmount) AS AvgMonthlySales\par
+FROM MonthlySalesEmp\par
+GROUP BY EmployeeName, Year\par
+ORDER BY EmployeeName, Year\par
+\par
+EMPLOYEE| YEAR | TOTAL SALES | AVG MONTHLY SALES IN THE YEAR\par
+\par
+"AndrewFuller";1996;21757.0602;3626.1767000000000000\par
+"AndrewFuller";1997;68063.0903;5671.9241916666666667\par
+"AndrewFuller";1998;62344.6503;15586.162575000000\par
+"AnneDodsworth";1996;9894.5148;3298.1716000000000000\par
+"AnneDodsworth";1997;18906.4925;1890.6492500000000000\par
+"AnneDodsworth";1998;40245.1588;10061.2897000000000000\par
+"JanetLeverling";1996;16461.9601;3292.3920200000000000\par
+\par
+\par
+\b Query 6.9. \cf1\b0 Total sales amount and total discount amount per product and month.\par
+\cf0\par
+SELECT P.ProductName, to_char(to_timestamp(to_char((T.MonthNumber),'999'),'MM'),'Mon') || ' ' || CAST(T.Year  AS CHAR(4))  AS Month,SUM(S.SalesAmount) AS SalesAmount,\par
+SUM(S.UnitPrice * S.Quantity * S.Discount) AS TotalDisc\par
+FROM Sales S, Time T, Product P\par
+WHERE S.OrderDateKey = T.TimeKey AND S.ProductKey = P.ProductKey\par
+GROUP BY P.ProductName, T.Year, T.MonthNumber\par
+ORDER BY P.ProductName, T.Year, T.MonthNumber\par
+\par
+PRODUCT | MONTH | TOTAL SALES IN MONTH | TOTAL DISCOUNT IN MONTH\par
+"Alice Mutton";"Jul 1996";936.0000;0\par
+"Alice Mutton";"Aug 1996";819.0000;117\par
+"Alice Mutton";"Sep 1996";1248.0000;0\par
+"Alice Mutton";"Oct 1996";2948.4000;109.200001627207\par
+"Alice Mutton";"Nov 1996";1010.8800;112.320001673698\par
+"Alice Mutton";"Jan 1997";2355.6002;670.800004184246\par
+"Alice Mutton";"Feb 1997";312.0000;0\par
+\par
+\b Query 6.10. \cf1\b0 Monthly year-to-date sales for each product category.\par
+\cf0\par
+\par
+WITH SalesByCategoryMonth AS (\par
+SELECT CategoryName, Year, MonthNumber, MonthName,\par
+SUM(SalesAmount) AS SalesAmount\par
+FROM Sales S, Product P, Category C, Time T\par
+WHERE S.OrderDateKey = T.TimeKey AND\par
+S.ProductKey = P.ProductKey AND\par
+P.CategoryKey = C.CategoryKey\par
+GROUP BY CategoryName, Year, MonthNumber, MonthName )\par
+SELECT CategoryName,\par
+MonthName || CAST(Year AS CHAR(4)) AS Month,\par
+SUM(SalesAmount) OVER (PARTITION BY\par
+CategoryName, Year ORDER BY MonthNumber\par
+ROWS UNBOUNDED PRECEDING)\par
+AS YTDSalesAmount\par
+FROM SalesByCategoryMonth\par
+ORDER BY CategoryName, Year, MonthNumber\par
+\par
+PRODUCT | MONTH-YEAR | YDT SALES\par
+"Beverages";"July1996";3182.5000\par
+"Beverages";"August1996";8049.3800\par
+"Beverages";"September1996";11793.7800\par
+"Beverages";"October1996";19896.0199\par
+"Beverages";"November1996";37058.0799\par
+"Beverages";"December1996";46129.8799\par
+"Beverages";"February1997";21904.1604\par
+\par
+\b Query 6.11. \cf1\b0 Moving average over the last 3 months of the sales amount by product category.\par
+\cf0\par
+WITH SalesByCategoryMonth AS (\par
+SELECT CategoryName, Year, MonthNumber, MonthName,\par
+SUM(SalesAmount) AS SalesAmount\par
+FROM Sales S, Product P, Category C, Time T\par
+WHERE S.OrderDateKey = T.TimeKey AND\par
+S.ProductKey = P.ProductKey AND\par
+P.CategoryKey = C.CategoryKey\par
+GROUP BY CategoryName, Year, MonthNumber, MonthName )\par
+SELECT CategoryName,\par
+MonthName || CAST(Year AS CHAR(4)) AS Month,\par
+SalesAmount AS SalesAmount,\par
+AVG(SalesAmount) OVER (PARTITION BY\par
+CategoryName ORDER BY Year, MonthNumber\par
+ROWS 2 PRECEDING) AS MovAvg3Months\par
+FROM SalesByCategoryMonth\par
+ORDER BY CategoryName, Year, MonthNumber\par
+\par
+PRODUCT | MONTH YEAR | SALES IN MONTH | 3-MONTHS MV AVG \par
+\par
+"Beverages";"July1996";3182.5000;3182.5000000000000000\par
+"Beverages";"August1996";4866.8800;4024.6900000000000000\par
+"Beverages";"September1996";3744.4000;3931.2600000000000000\par
+"Beverages";"October1996";8102.2399;5571.1733000000000000\par
+"Beverages";"November1996";17162.0600;9669.5666333333333333\par
+"Beverages";"December1996";9071.8000;11445.3666333333333333\par
+"Beverages";"February1997";21904.1604;16046.006800000000\par
+"Beverages";"February1997";2845.8400;11273.9334666666666667\par
+\par
+\par
+\b Query 6.12. \cf1\b0 Personal sales amount made by an employee compared with the total sales amount made by herself and her subordinates during 1997.\par
+\cf0\par
+WITH RECURSIVE SalesByEmp1997 AS (\par
+SELECT E.EmployeeKey,\par
+FirstName || LastName AS EmployeeName,\par
+SUM(S.SalesAmount) AS SalesAmount\par
+FROM Sales S, Employee E, Time T\par
+WHERE S.EmployeeKey = E.EmployeeKey AND\par
+S.OrderDateKey = T.TimeKey AND T.Year = 1997\par
+GROUP BY E.EmployeeKey, FirstName, LastName ),\par
+Supervision(SupervisorKey, SubordinateKey) AS (\par
+SELECT SupervisorKey, EmployeeKey\par
+FROM Employee\par
+WHERE SupervisorKey IS NOT NULL\par
+UNION ALL\par
+SELECT S.SupervisorKey, E.EmployeeKey\par
+FROM Supervision S, Employee E\par
+WHERE S.SubordinateKey = E.SupervisorKey )\par
+SELECT T2.EmployeeName,\par
+T2.SalesAmount AS PersonalSales,\par
+(T1.TotalSubSales + T2.SalesAmount) AS SalesAmount\par
+FROM ( SELECT SupervisorKey, SUM(S.SalesAmount) AS TotalSubSales\par
+FROM Supervision U, SalesByEmp1997 S\par
+WHERE S.EmployeeKey = U.SubordinateKey\par
+GROUP BY SupervisorKey\par
+) T1 JOIN SalesByEmp1997 T2 ON\par
+T1.SupervisorKey = T2.EmployeeKey\par
+UNION\par
+SELECT EmployeeName,\par
+SalesAmount AS PersonalSales,\par
+SalesAmount AS SalesAmount\par
+FROM SalesByEmp1997 S\par
+WHERE NOT EXISTS (\par
+SELECT *\par
+FROM Supervision U\par
+WHERE S.EmployeeKey = SupervisorKey )\par
+\par
+EMPLOYEE | PERSONAL SALES | TOTAL SALES (INCLUDING SUBORDINATES)\par
+"AndrewFuller";68063.0903;596630.7985\par
+"JanetLeverling";105351.3002;105351.3002\par
+"AnneDodsworth";18906.4925;18906.4925\par
+"MichaelSuyama";38213.3690;38213.3690\par
+"LauraCallahan";56032.6151;56032.6151\par
+"NancyDavolio";90629.0775;90629.0775\par
+"MargaretPeacock";128809.7912;128809.7912\par
+\par
+\b Query 6.13\cf1 . \b0 Total sales amount, number of products, and sum of the quantities sold for each order.\par
+\par
+\cf0 SELECT OrderNo,\par
+SUM(SalesAmount)AS SalesAmount,\par
+MAX(OrderLineNo) AS NbProducts, SUM(Quantity) AS Quantity\par
+FROM Sales\par
+GROUP BY OrderNo\par
+ORDER BY OrderNo\par
+\par
+ORDER| AMOUNT| #PRODUCTS | QUANTITY\par
+10248;440.0000;3;27\par
+10249;1863.4000;2;49\par
+10250;1552.6000;3;60\par
+10251;654.0600;3;41\par
+10252;3597.9001;3;105\par
+10253;1444.8000;3;102\par
+10254;556.6200;3;57\par
+\par
+\b Query 6.14. \cf1\b0 For each month, total number of orders, total sales amount, and average sales amount by order.\par
+\cf0\par
+WITH OrderAgg AS (\par
+SELECT OrderNo, OrderDateKey,\par
+SUM(SalesAmount) AS SalesAmount\par
+FROM Sales\par
+GROUP BY OrderNo, OrderDateKey )\par
+SELECT to_char(to_timestamp(to_char((MonthNumber),'999'),'MM'),'Mon') || ' ' || CAST(Year  AS CHAR(4))  AS Month,\par
+COUNT(OrderNo) AS NoOrders,\par
+SUM(SalesAmount) AS SalesAmount,\par
+AVG(SalesAmount) AS AvgAmount\par
+FROM OrderAgg O, Time T\par
+WHERE O.OrderDateKey = T.TimeKey\par
+GROUP BY Year, MonthNumber\par
+ORDER BY Year, MonthNumber\par
+\par
+MONTH-YEAR | # ORDERS | SALES AMOUNT | AVG SALES AMOUNT\par
+\par
+"Jul 1996";22;27861.8950;1266.4497727272727273\par
+"Aug 1996";25;25485.2751;1019.4110040000000000\par
+"Sep 1996";21;21974.4001;1046.4000047619047619\par
+"Oct 1996";25;35479.5648;1419.1825920000000000\par
+"Nov 1996";25;45600.0450;1824.0018000000000000\par
+"Dec 1996";29;42559.4103;1467.5658724137931034\par
+"Jan 1997";32;59816.6955;1869.2717343750000000\par
+\par
+\b Query 6.15\cf1 . \b0 For each employee, total sales amount, number of cities, and  number of states to which she is assigned.\par
+\par
+\cf0 SELECT FirstName || LastName AS FullName,\par
+(SUM(SalesAmount) / COUNT(DISTINCT CityName)) AS TotalSales,\par
+COUNT(DISTINCT CityName) AS NoCities,\par
+COUNT(DISTINCT StateName) AS NoStates\par
+FROM Sales F, Employee E, Territories T, City C, State S\par
+WHERE F.EmployeeKey = E.EmployeeKey AND\par
+E.EmployeeKey = T.EmployeeKey AND\par
+T.CityKey = C.CityKey AND C.StateKey = S.StateKey\par
+GROUP BY FirstName || LastName\par
+ORDER BY FirstName || LastName\par
+\par
+EMPLOYEE | TOTAL SALES AMOUNT | # CITIES | # STATES\par
+"AndrewFuller";152164.800800000000;6;3\par
+"AnneDodsworth";69046.166100000000;7;5\par
+"JanetLeverling";186197.797800000000;4;2\par
+"LauraCallahan";122528.857300000000;4;3\par
+"MargaretPeacock";224397.296500000000;3;2\par
+"MichaelSuyama";64969.629000000000;5;3\par
+\par
+\par
+\par
+\par
+}
+ 

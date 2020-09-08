@@ -1,0 +1,121 @@
+Python   pandas
+R        ggplot2
+
+Tableau
+PowerBi   R  Python
+
+Metabase
+SuperSet:  Apache
+
+Flourish    subis el dataset y visualizas en la nube
+
+RAWGraphs
+
+http://d3plus.org/
+https://datausa.io/
+
+
+https://docs.google.com/spreadsheets/d/1lGh2Xg8w1DV2u8mhIjKP929zMU_Y0FrwUdmH4pTfqdM/edit#gid=1740053312
+
+
+
+https://colab.research.google.com/notebooks/welcome.ipynb#scrollTo=xitplqMNk_Hc
+
+
+//amb para pgm en forma remota   12Gb de RAM
+https://www.jupiterlabs.com/
+
+
+
+https://news.google.com/rss
+
+// DataWorld
+https://data.world/makeovermonday/2019w31
+
+https://data.world/mdberra/ejercicio3/workspace/query?filename=STD+Cases.csv&newQueryContent=SELECT+%2A%0AFROM+std_cases%0ALIMIT+5000&newQueryType=SQL&selectedTable=std_cases&tempId=1564842591697
+
+// convertir CSV a JSON
+https://shancarter.github.io/mr-data-converter/
+
+// documentacion de SVG
+https://developer.mozilla.org/en-US/docs/Web/SVG/Element/rect
+
+
+// en Pyhton 3.7  te levanta un web server en un directorio
+python -m http.server
+
+
+
+GITHUB
+. GIST
+  . anotador para colocar cosas pequenias
+  . si haces un index.html public
+  . bl.ock.org/ +username   te ejecuta el index.html
+
+. repository
+  . master
+  . gh-pages
+    . username.guthubio/repo/    ejecuta el master.md
+
+https://mdberra.github.io/infovis/Hola.html    lo toma del branch  gh-pages
+
+. se puede hacer que   gh-pages   es el Default master
+. entonces cualquier cosa que publicamos en   gh-pages  funciona
+. luego borramos la master
+
+
+http://bl.ocks.org/mdberra
+
+
+ver   Observablehq.com
+
+
+
+
+Famosas visualizaciones
+-----------------------
+
+TimeLine.js
+-----------
+https://timeline.knightlab.com/
+
+https://mdberra.github.io/infovis/timeline.html
+
+
+
+DATASEST
+
+METABASE
+
+
+
+CHORD DIAGRAM  cuando tenemos una matriz donde los 2 ejes son la misma variable
+
+
+
+
+RAW  Density Design   genera SVG y PNG
+
+FLOURISH STUDIO
+
+PYTHON  --> ALTAIR -->  VEGA
+
+R, GGPLOT2
+
+
+
+
+beeswarm  de BOSTOCK
+
+ver Circle Parking with zoom de boostok   para hacer un organigrama
+
+Tecnologia para utilizar  ultimo -->  WEB GL
+
+
+Ver diplomatura de PEOPLE ANALITICS
+
+
+GeoJson.io
+
+
+

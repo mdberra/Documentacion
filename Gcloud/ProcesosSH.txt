@@ -1,0 +1,54 @@
+VIM
+  i pasar escribir
+  ESC :q   para salir sin escribir
+  ESC :wq  para salir guardando
+
+cuando se reinicia el server hay
+. entrar en ssh y hacer sudo nginx
+
+
+LANZADOR.SH
+script para que se ejecute cuando se reinicia el servidor
+
+. CentOS 7 de 64 bits.
+  Asumo que el script esta hecho y tiene permisos de ejecución. sudo chmod +x /home/liberdina/Lanzador.sh
+
+. sudo nano /etc/rc.d/rc.local
+  Agregamos al final de la linea:   /home/liberdina/Lanzador.sh
+
+. Guardamos (control + o) y luego cerramos el editor de texto (control + x). Volvemos a teclear en la consola:
+  sudo chmod a+x /etc/rc.d/rc.local
+
+. Reiniciamos el sistema
+  sudo reboot
+  Luego de reiniciar, ya se ejecutará el script al iniciar el Sistema.
+
+
+KILL
+----
+ps -ef |grep server
+
+liberdi+  1135  1133  0 20:44 ?        00:00:00 /usr/libexec/openssh/sftp-server
+liberdi+  1280  1277  0 20:53 ?        00:00:00 /usr/libexec/openssh/sftp-server
+liberdi+  1363  1362  0 20:59 ?        00:00:00 /usr/libexec/openssh/sftp-server
+liberdi+  1504  1134  0 21:09 pts/0    00:00:00 grep --color=auto server
+
+kill -9 1135
+kill -9 1280
+kill -9 1363
+
+ps -ef |grep server
+liberdi+  1569  1134  0 21:09 pts/0    00:00:00 grep --color=auto server
+
+
+
+CRONTAB
+-------
+. Verify if cronie package is installed
+sudo rpm -q cronie
+
+. Check if  crond service is running
+sudo systemctl status crond.service
+
+. Configure cron jobs
+sudo cat /etc/crontab
